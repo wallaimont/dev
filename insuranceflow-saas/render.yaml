@@ -1,0 +1,49 @@
+services:
+  - type: web
+    name: insuranceflow-saas
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    healthCheckPath: /actuator/health
+    plan: starter
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DB_HOST
+        fromDatabase:
+          name: insuranceflow-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: insuranceflow-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: insuranceflow-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: insuranceflow-db
+          property: user
+      - key: DB_PASS
+        fromDatabase:
+          name: insuranceflow-db
+          property: password
+      - key: CORS_ORIGINS
+        value: https://app.seudominio.com.br
+      - key: PLATFORM_URL
+        value: https://app.seudominio.com.br
+      - key: SERVER_COOKIE_SECURE
+        value: "true"
+      - key: SWAGGER_ENABLED
+        value: "false"
+      - key: LOG_LEVEL
+        value: INFO
+      - key: MANAGEMENT_HEALTH_MAIL_ENABLED
+        value: "false"
+
+databases:
+  - name: insuranceflow-db
+    plan: starter
+    databaseName: insuranceflow
+    user: insuranceflow

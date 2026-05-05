@@ -1,0 +1,133 @@
+{
+  "common": {
+    "appName": "Orbyt Market",
+    "loading": "Carregando...",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "search": "Buscar",
+    "noResults": "Nenhum resultado encontrado",
+    "logout": "Sair",
+    "login": "Entrar",
+    "register": "Cadastrar"
+  },
+  "nav": {
+    "home": "Início",
+    "catalog": "Catálogo",
+    "cart": "Carrinho",
+    "buyer": "Comprador",
+    "orders": "Pedidos",
+    "chat": "Chat",
+    "notifications": "Notificações",
+    "support": "Suporte",
+    "seller": "Seller",
+    "products": "Produtos",
+    "admin": "Admin",
+    "profile": "Perfil",
+    "wishlist": "Favoritos",
+    "reviews": "Avaliações",
+    "payouts": "Repasses",
+    "users": "Usuários",
+    "coupons": "Cupons",
+    "cms": "CMS",
+    "fraud": "Antifraude"
+  },
+  "auth": {
+    "loginTitle": "Entrar",
+    "registerTitle": "Criar conta",
+    "email": "Email",
+    "password": "Senha",
+    "name": "Nome",
+    "loginButton": "Entrar",
+    "registerButton": "Criar conta",
+    "noAccount": "Não tem conta?",
+    "hasAccount": "Já tem conta?",
+    "invalidCredentials": "Email ou senha inválidos",
+    "registerError": "Erro ao criar conta. Tente novamente."
+  },
+  "catalog": {
+    "title": "Catálogo",
+    "searchPlaceholder": "Buscar produtos...",
+    "addToCart": "+ Carrinho",
+    "products": "produtos disponíveis"
+  },
+  "cart": {
+    "title": "Carrinho",
+    "empty": "Carrinho vazio",
+    "emptySubtitle": "Adicione produtos do catálogo para começar",
+    "goToCatalog": "Ir para o catálogo",
+    "remove": "Remover",
+    "total": "Total do carrinho",
+    "checkout": "Finalizar compra"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "orderSummary": "Resumo do pedido",
+    "coupon": "Cupom de desconto",
+    "couponPlaceholder": "Digite o cupom",
+    "applyCoupon": "Aplicar",
+    "invalidCoupon": "Cupom inválido ou expirado",
+    "discountApplied": "Desconto aplicado",
+    "payment": "Pagamento",
+    "pix": "PIX (aprovação instantânea)",
+    "creditCard": "Cartão de crédito",
+    "boleto": "Boleto bancário",
+    "subtotal": "Subtotal",
+    "discount": "Desconto",
+    "confirm": "Confirmar pedido",
+    "processing": "Processando..."
+  },
+  "orders": {
+    "title": "Meus Pedidos",
+    "continueShopping": "Continuar comprando",
+    "noOrders": "Nenhum pedido",
+    "noOrdersSubtitle": "Você ainda não fez nenhuma compra",
+    "order": "Pedido",
+    "total": "Total",
+    "tracking": "Rastreio"
+  },
+  "notifications": {
+    "title": "Notificações",
+    "unread": "Não lidas",
+    "previous": "Anteriores",
+    "markRead": "Marcar lida",
+    "empty": "Sem notificações",
+    "emptySubtitle": "Você está em dia!"
+  },
+  "support": {
+    "title": "Suporte",
+    "newTicket": "Novo chamado",
+    "subject": "Assunto",
+    "category": "Categoria",
+    "message": "Descreva seu problema...",
+    "submit": "Abrir chamado",
+    "submitting": "Enviando...",
+    "yourTickets": "Seus chamados",
+    "noTickets": "Nenhum chamado aberto",
+    "categories": {
+      "ORDER_ISSUE": "Problema com pedido",
+      "PAYMENT": "Pagamento",
+      "SHIPPING": "Entrega",
+      "PRODUCT": "Produto",
+      "ACCOUNT": "Conta",
+      "OTHER": "Outro"
+    }
+  },
+  "seller": {
+    "revenue": "Receita líquida",
+    "pendingOrders": "Pedidos a expedir",
+    "payout": "Repasse previsto",
+    "newProduct": "Novo produto",
+    "createProduct": "Criar produto",
+    "receivedOrders": "Pedidos recebidos"
+  },
+  "admin": {
+    "session": "Sessão admin",
+    "gmv": "GMV",
+    "fraud": "Antifraude",
+    "sellers": "Vendedores ativos"
+  }
+}

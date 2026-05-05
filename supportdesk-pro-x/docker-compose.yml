@@ -1,0 +1,143 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sdpx-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-supportdesk_pro_x}
+      POSTGRES_USER: ${POSTGRES_USER:-sdpx_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sdpx_pass_2024}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5435}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sdpx_user -d supportdesk_pro_x"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sdpx-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: sdpx-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD:-sdpx_redis_2024} --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-sdpx_redis_2024}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sdpx-net
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: sdpx-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - sdpx-net
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: sdpx-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:29092", "--list"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    networks:
+      - sdpx-net
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: sdpx-kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "${KAFKA_UI_PORT:-8090}:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: sdpx-local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    networks:
+      - sdpx-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sdpx-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-supportdesk_pro_x}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-sdpx_user}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-sdpx_pass_2024}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-sdpx_redis_2024}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:-kafka:29092}
+      APP_JWT_ACCESS_TOKEN_EXPIRY_MS: 900000
+      APP_JWT_REFRESH_TOKEN_EXPIRY_DAYS: 7
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health/readiness"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - sdpx-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sdpx-frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-4200}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sdpx-net
+
+volumes:
+  pgdata:
+  redisdata:
+
+networks:
+  sdpx-net:
+    driver: bridge

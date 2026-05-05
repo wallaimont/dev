@@ -1,0 +1,37 @@
+services:
+  app:
+    build: .
+    container_name: siga-seguros-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/siga_seguros
+      SPRING_DATASOURCE_USERNAME: siga
+      SPRING_DATASOURCE_PASSWORD: siga123
+      JWT_SECRET: minha-chave-secreta-jwt-siga-seguros-2024-prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: siga-seguros-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: siga_seguros
+      POSTGRES_USER: siga
+      POSTGRES_PASSWORD: siga123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U siga -d siga_seguros"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

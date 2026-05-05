@@ -1,0 +1,68 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "percentunit"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
+      "id": 1,
+      "targets": [
+        {"expr": "sum(rate(orbyt_payment_events_total{status=\"APPROVED\"}[5m])) / clamp_min(sum(rate(orbyt_payment_events_total{status=~\"APPROVED|CREATED\"}[5m])), 0.0001)", "legendFormat": "approval", "refId": "A"}
+      ],
+      "title": "Taxa de Aprovação de Pagamento",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "currencyBRL"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0},
+      "id": 2,
+      "targets": [
+        {"expr": "sum(rate(orbyt_payment_amount_sum{method=\"PIX\"}[5m]))", "legendFormat": "pix", "refId": "A"}
+      ],
+      "title": "Volume PIX (R$/s)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "ops"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0},
+      "id": 3,
+      "targets": [
+        {"expr": "sum(rate(orbyt_payment_webhook_events_total{status=\"PROCESSED\"}[5m]))", "legendFormat": "processed", "refId": "A"},
+        {"expr": "sum(rate(orbyt_payment_webhook_events_total{status=\"IDEMPOTENT\"}[5m]))", "legendFormat": "idempotent", "refId": "B"}
+      ],
+      "title": "Eventos de Webhook PIX",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8},
+      "id": 4,
+      "targets": [
+        {"expr": "sum by (method, status) (increase(orbyt_payment_events_total[1h]))", "legendFormat": "{{method}} {{status}}", "refId": "A"}
+      ],
+      "title": "Eventos de Pagamento por Método e Status (1h)",
+      "type": "barchart"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["payment", "orbyt"],
+  "templating": {"list": []},
+  "time": {"from": "now-6h", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Payment Operations",
+  "uid": "orbyt-payment",
+  "version": 1,
+  "weekStart": ""
+}

@@ -1,0 +1,9 @@
+{
+  "strategy": "grid",
+  "scoring": "f1_weighted",
+  "best_params": {
+    "model__max_depth": 6,
+    "model__n_estimators": 100
+  },
+  "best_score": 1.0
+}

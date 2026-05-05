@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Clientes')}"></head>
+<body>
+<div class="main-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div class="main-content">
+        <div th:replace="~{fragments/layout :: topbar}"></div>
+        <div class="content-area">
+
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Clientes</h1>
+                    <p class="page-subtitle">Gest&#227;o de clientes cadastrados</p>
+                </div>
+                <button class="btn btn-primary" onclick="novoCliente()">
+                    <i class="bi bi-plus-lg me-1"></i>Novo Cliente
+                </button>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="bi bi-people-fill"></i></div>
+                        <div class="stat-info"><h3 id="statTotal">-</h3><p>Total</p></div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="bi bi-person-check-fill"></i></div>
+                        <div class="stat-info"><h3 id="statPF">-</h3><p>Pessoa F&#237;sica</p></div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><i class="bi bi-building-fill"></i></div>
+                        <div class="stat-info"><h3 id="statPJ">-</h3><p>Pessoa Jur&#237;dica</p></div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon teal"><i class="bi bi-star-fill"></i></div>
+                        <div class="stat-info"><h3 id="statAtivos">-</h3><p>Ativos</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-toolbar">
+                    <div class="table-filters">
+                        <input type="text" class="form-control" placeholder="Buscar por nome..." id="fNome" onkeyup="if(event.key==='Enter')loadClientes()">
+                        <input type="text" class="form-control" placeholder="CPF/CNPJ..." id="fCpfCnpj" onkeyup="if(event.key==='Enter')loadClientes()">
+                        <select class="form-select" id="fTipo" onchange="loadClientes()">
+                            <option value="">Todos os tipos</option>
+                            <option value="PESSOA_FISICA">Pessoa F&#237;sica</option>
+                            <option value="PESSOA_JURIDICA">Pessoa Jur&#237;dica</option>
+                        </select>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadClientes()"><i class="bi bi-search me-1"></i>Filtrar</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead><tr><th>Nome</th><th>CPF/CNPJ</th><th>Tipo</th><th>E-mail</th><th>Telefone</th><th>Status</th><th width="100">A&#231;&#245;es</th></tr></thead>
+                        <tbody id="tblClientes"><tr><td colspan="7" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Carregando...</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="table-pagination" id="pagination"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: toasts}"></div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>
+let clienteStats = { total: 0, pf: 0, pj: 0, ativos: 0 };
+
+async function loadClientes(page = 0) {
+    const params = new URLSearchParams({ page, size: 20 });
+    const nome = document.getElementById('fNome').value;
+    const cpfCnpj = document.getElementById('fCpfCnpj').value;
+    const tipo = document.getElementById('fTipo').value;
+    if (nome) params.append('nome', nome);
+    if (cpfCnpj) params.append('cpfCnpj', cpfCnpj);
+    if (tipo) params.append('tipoPessoa', tipo);
+
+    try {
+        const res = await API.get('/clientes?' + params);
+        const data = res.data;
+        const tb = document.getElementById('tblClientes');
+
+        // Update stats from first page
+        if (page === 0) {
+            document.getElementById('statTotal').textContent = data.totalElements || 0;
+            let pf = 0, pj = 0, ativos = 0;
+            data.content.forEach(c => {
+                if (c.tipoPessoa === 'PESSOA_FISICA') pf++; else pj++;
+                if (c.active) ativos++;
+            });
+            document.getElementById('statPF').textContent = pf;
+            document.getElementById('statPJ').textContent = pj;
+            document.getElementById('statAtivos').textContent = ativos;
+        }
+
+        if (data.content.length === 0) {
+            tb.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>Nenhum cliente encontrado</td></tr>';
+        } else {
+            tb.innerHTML = data.content.map(c => `<tr>
+                <td><strong>${c.nomeCompleto || c.razaoSocial || ''}</strong></td>
+                <td><code style="font-size:12px">${c.cpfCnpj || ''}</code></td>
+                <td>${c.tipoPessoa === 'PESSOA_FISICA' ? '<span class="badge-status badge-info">PF</span>' : '<span class="badge-status badge-primary">PJ</span>'}</td>
+                <td>${c.email || '-'}</td>
+                <td>${c.telefone || '-'}</td>
+                <td>${c.active ? '<span class="badge-status badge-success">Ativo</span>' : '<span class="badge-status badge-secondary">Inativo</span>'}</td>
+                <td>
+                    ${canEdit('clientes') ? `<button class="btn btn-icon btn-outline-primary btn-sm me-1" onclick="editarCliente(${c.id})" title="Editar"><i class="bi bi-pencil"></i></button>` : ''}
+                    ${canDelete('clientes') ? `<button class="btn btn-icon btn-outline-danger btn-sm" onclick="inativarCliente(${c.id})" title="Inativar"><i class="bi bi-trash"></i></button>` : ''}
+                </td>
+            </tr>`).join('');
+        }
+        document.getElementById('pagination').innerHTML = renderPagination(data, 'loadClientes');
+    } catch (err) { showToast(err.message, 'danger'); }
+}
+
+function formCliente(c = {}) {
+    return `<form id="formCliente">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Tipo Pessoa</label>
+                <select class="form-select" id="cTipoPessoa" required onchange="toggleTipoPessoa()">
+                    <option value="PESSOA_FISICA" ${c.tipoPessoa === 'PESSOA_JURIDICA' ? '' : 'selected'}>Pessoa F\u00edsica</option>
+                    <option value="PESSOA_JURIDICA" ${c.tipoPessoa === 'PESSOA_JURIDICA' ? 'selected' : ''}>Pessoa Jur\u00eddica</option>
+                </select>
+            </div>
+            <div class="col-md-6"><label class="form-label">CPF/CNPJ</label><input type="text" class="form-control" id="cCpfCnpj" value="${c.cpfCnpj || ''}" required></div>
+            <div class="col-md-6" id="divNomeCompleto"><label class="form-label">Nome Completo</label><input type="text" class="form-control" id="cNomeCompleto" value="${c.nomeCompleto || ''}"></div>
+            <div class="col-md-6 d-none" id="divRazaoSocial"><label class="form-label">Raz\u00e3o Social</label><input type="text" class="form-control" id="cRazaoSocial" value="${c.razaoSocial || ''}"></div>
+            <div class="col-md-6 d-none" id="divNomeFantasia"><label class="form-label">Nome Fantasia</label><input type="text" class="form-control" id="cNomeFantasia" value="${c.nomeFantasia || ''}"></div>
+            <div class="col-md-6"><label class="form-label">E-mail</label><input type="email" class="form-control" id="cEmail" value="${c.email || ''}"></div>
+            <div class="col-md-6"><label class="form-label">Telefone</label><input type="text" class="form-control" id="cTelefone" value="${c.telefone || ''}"></div>
+            <div class="col-md-6"><label class="form-label">Data Nascimento</label><input type="text" class="form-control" id="cDataNascimento" value="${c.dataNascimento || ''}" placeholder="dd/mm/aaaa"></div>
+            <div class="col-12"><label class="form-label">Endere\u00e7o</label><input type="text" class="form-control" id="cEndereco" value="${c.endereco || ''}"></div>
+            <div class="col-md-4"><label class="form-label">Cidade</label><input type="text" class="form-control" id="cCidade" value="${c.cidade || ''}"></div>
+            <div class="col-md-4"><label class="form-label">UF</label><input type="text" class="form-control" id="cUf" value="${c.uf || ''}" maxlength="2"></div>
+            <div class="col-md-4"><label class="form-label">CEP</label><input type="text" class="form-control" id="cCep" value="${c.cep || ''}"></div>
+            <div class="col-12"><label class="form-label">Observa\u00e7\u00f5es</label><textarea class="form-control" id="cObs" rows="2">${c.observacoes || ''}</textarea></div>
+        </div>
+    </form>`;
+}
+
+function toggleTipoPessoa() {
+    const isPJ = document.getElementById('cTipoPessoa').value === 'PESSOA_JURIDICA';
+    document.getElementById('divNomeCompleto').classList.toggle('d-none', isPJ);
+    document.getElementById('divRazaoSocial').classList.toggle('d-none', !isPJ);
+    document.getElementById('divNomeFantasia').classList.toggle('d-none', !isPJ);
+}
+
+function getFormData() {
+    return {
+        tipoPessoa: document.getElementById('cTipoPessoa').value,
+        cpfCnpj: document.getElementById('cCpfCnpj').value,
+        nomeCompleto: document.getElementById('cNomeCompleto').value,
+        razaoSocial: document.getElementById('cRazaoSocial').value,
+        nomeFantasia: document.getElementById('cNomeFantasia').value,
+        email: document.getElementById('cEmail').value,
+        telefone: document.getElementById('cTelefone').value,
+        dataNascimento: document.getElementById('cDataNascimento').value,
+        endereco: document.getElementById('cEndereco').value,
+        cidade: document.getElementById('cCidade').value,
+        uf: document.getElementById('cUf').value,
+        cep: document.getElementById('cCep').value,
+        observacoes: document.getElementById('cObs').value
+    };
+}
+
+function novoCliente() {
+    showModal('Novo Cliente', formCliente(), async () => {
+        await API.post('/clientes', getFormData());
+        showToast('Cliente criado com sucesso');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadClientes();
+    }, 'lg');
+}
+
+async function editarCliente(id) {
+    const res = await API.get('/clientes/' + id);
+    showModal('Editar Cliente', formCliente(res.data), async () => {
+        await API.put('/clientes/' + id, getFormData());
+        showToast('Cliente atualizado com sucesso');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadClientes();
+    }, 'lg');
+    toggleTipoPessoa();
+}
+
+async function inativarCliente(id) {
+    if (!confirm('Deseja inativar este cliente?')) return;
+    await API.del('/clientes/' + id);
+    showToast('Cliente inativado');
+    loadClientes();
+}
+
+document.addEventListener('DOMContentLoaded', loadClientes);
+</script>
+</body>
+</html>

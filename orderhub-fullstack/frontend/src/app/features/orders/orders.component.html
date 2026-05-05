@@ -1,0 +1,49 @@
+<div class="container">
+  <h1 style="margin-bottom: 20px;">Pedidos</h1>
+
+  <div class="card" style="margin-bottom: 20px;">
+    <h3 style="margin-bottom: 16px;">Novo pedido</h3>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
+      <div>
+        <label>Cliente</label>
+        <select formControlName="clientId">
+          <option [ngValue]="null">Selecione</option>
+          <option *ngFor="let client of clients" [ngValue]="client.id">{{ client.name }}</option>
+        </select>
+      </div>
+      <div>
+        <label>Produto</label>
+        <select formControlName="productId">
+          <option [ngValue]="null">Selecione</option>
+          <option *ngFor="let product of products" [ngValue]="product.id">{{ product.name }}</option>
+        </select>
+      </div>
+      <div>
+        <label>Quantidade</label>
+        <input type="number" formControlName="quantity">
+      </div>
+      <div>
+        <button class="btn btn-primary" type="submit">Criar pedido</button>
+      </div>
+    </form>
+    <p style="margin-top: 12px; color: #16a34a;" *ngIf="integrationMessage">{{ integrationMessage }}</p>
+  </div>
+
+  <div class="card">
+    <h3>Lista de pedidos</h3>
+    <table class="table">
+      <thead>
+      <tr><th>ID</th><th>Status</th><th>Total</th><th>Integração</th><th>Ação</th></tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let order of orders">
+        <td>{{ order.id }}</td>
+        <td>{{ order.status }}</td>
+        <td>{{ order.totalAmount | currency:'BRL' }}</td>
+        <td>{{ order.integrationStatus }}</td>
+        <td><button class="btn btn-success" (click)="sendToBilling(order.id)">Enviar faturamento</button></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

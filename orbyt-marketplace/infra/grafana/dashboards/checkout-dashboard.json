@@ -1,0 +1,80 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "showThresholdLabels": false, "showThresholdMarkers": true},
+      "targets": [
+        {"expr": "sum(rate(orbyt_checkout_requests_total{status=\"SUCCESS\"}[5m]))", "legendFormat": "checkout/s", "refId": "A"}
+      ],
+      "title": "Taxa de Checkouts Bem-sucedidos",
+      "type": "gauge"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "percentunit"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0},
+      "id": 2,
+      "targets": [
+        {"expr": "sum(rate(orbyt_checkout_requests_total{status=\"SUCCESS\"}[5m])) / clamp_min(sum(rate(orbyt_checkout_requests_total[5m])), 0.0001)", "legendFormat": "conversao", "refId": "A"}
+      ],
+      "title": "Conversão de Checkout",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "currencyBRL"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0},
+      "id": 3,
+      "targets": [
+        {"expr": "sum(rate(orbyt_checkout_amount_sum[5m]))", "legendFormat": "valor/min", "refId": "A"}
+      ],
+      "title": "Volume Financeiro no Checkout",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "id": 4,
+      "targets": [
+        {"expr": "histogram_quantile(0.95, sum(rate(orbyt_checkout_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95", "refId": "A"},
+        {"expr": "histogram_quantile(0.50, sum(rate(orbyt_checkout_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p50", "refId": "B"}
+      ],
+      "title": "Latência de Checkout",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "id": 5,
+      "targets": [
+        {"expr": "sum by (payment_method) (increase(orbyt_checkout_requests_total{status=\"SUCCESS\"}[1h]))", "legendFormat": "{{payment_method}}", "refId": "A"}
+      ],
+      "title": "Checkouts por Método de Pagamento",
+      "type": "barchart"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["checkout", "orbyt"],
+  "templating": {"list": []},
+  "time": {"from": "now-6h", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Checkout Overview",
+  "uid": "orbyt-checkout",
+  "version": 1,
+  "weekStart": ""
+}

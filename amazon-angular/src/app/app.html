@@ -1,0 +1,195 @@
+<div class="store-shell">
+  <header class="topbar">
+    <div class="brand-block">
+      <div class="brand">TechStore</div>
+      <div class="brand-tag">delivery, ofertas e tecnologia em um só lugar</div>
+    </div>
+
+    <label class="searchbar">
+      <span class="search-prefix">Todos</span>
+      <input type="text" placeholder="Buscar produtos, marcas e ofertas" />
+      <button type="button">Buscar</button>
+    </label>
+
+    <button class="cart-button" type="button" (click)="toggleCart()">
+      <span class="cart-label">Carrinho</span>
+      <span class="cart-count">{{ cartCount }}</span>
+    </button>
+  </header>
+
+  <nav class="nav-strip">
+    @for (item of navigation; track item) {
+      <a href="#">{{ item }}</a>
+    }
+  </nav>
+
+  <main class="page-content">
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">Oferta do Dia</span>
+        <h1>Uma vitrine estilo Amazon, agora em Angular.</h1>
+        <p>
+          Produtos com destaque visual, oferta regressiva, carrinho interativo e layout responsivo
+          construídos em um componente Angular.
+        </p>
+
+        <div class="countdown">
+          <div>
+            <strong>{{ timeLeft.hours }}</strong>
+            <span>Horas</span>
+          </div>
+          <div>
+            <strong>{{ timeLeft.minutes }}</strong>
+            <span>Minutos</span>
+          </div>
+          <div>
+            <strong>{{ timeLeft.seconds }}</strong>
+            <span>Segundos</span>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <button type="button">Ver ofertas</button>
+          <button type="button" class="secondary">Explorar mais vendidos</button>
+        </div>
+      </div>
+
+      <aside class="hero-panel">
+        <h2>Frete rápido + descontos agressivos</h2>
+        @for (metric of featuredMetrics; track metric.label) {
+          <div class="metric-card">
+            <strong>{{ metric.value }}</strong>
+            <span>{{ metric.label }}</span>
+          </div>
+        }
+      </aside>
+    </section>
+
+    <section class="catalog-section">
+      <div class="section-heading">
+        <h2>Ofertas do dia</h2>
+        <a href="#">Ver tudo</a>
+      </div>
+
+      <div class="product-grid">
+        @for (product of deals; track product.id) {
+          <article class="product-card">
+            <div class="product-image" [style.background]="product.accent">
+              <span>{{ product.name.split(' ')[0] }}</span>
+            </div>
+            <p class="product-category">{{ product.category }}</p>
+            <h3>{{ product.name }}</h3>
+            <div class="rating-row">{{ stars(product.rating) }} <span>({{ product.reviews }})</span></div>
+            <div class="price-row">
+              <span class="old-price">{{ formatPrice(product.originalPrice) }}</span>
+              <strong>{{ formatPrice(product.discountPrice) }}</strong>
+            </div>
+            <div class="card-footer">
+              @if (product.badge) {
+                <span class="prime-badge">{{ product.badge }}</span>
+              }
+              <button type="button" (click)="addToCart(product)">Adicionar ao carrinho</button>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="catalog-section split-layout">
+      <div>
+        <div class="section-heading">
+          <h2>Mais vendidos</h2>
+          <a href="#">Top da semana</a>
+        </div>
+
+        <div class="product-grid compact-grid">
+          @for (product of bestSellers; track product.id) {
+            <article class="product-card compact">
+              <div class="product-image" [style.background]="product.accent">
+                <span>{{ product.name.split(' ')[0] }}</span>
+              </div>
+              <h3>{{ product.name }}</h3>
+              <div class="rating-row">{{ stars(product.rating) }} <span>({{ product.reviews }})</span></div>
+              <div class="price-row">
+                <span class="old-price">{{ formatPrice(product.originalPrice) }}</span>
+                <strong>{{ formatPrice(product.discountPrice) }}</strong>
+              </div>
+              <button type="button" (click)="addToCart(product)">Adicionar ao carrinho</button>
+            </article>
+          }
+        </div>
+      </div>
+
+      <div>
+        <div class="section-heading">
+          <h2>Continue comprando</h2>
+          <a href="#">Sugestões para você</a>
+        </div>
+
+        <div class="product-grid compact-grid">
+          @for (product of continueShopping; track product.id) {
+            <article class="product-card compact">
+              <div class="product-image" [style.background]="product.accent">
+                <span>{{ product.name.split(' ')[0] }}</span>
+              </div>
+              <h3>{{ product.name }}</h3>
+              <div class="rating-row">{{ stars(product.rating) }} <span>({{ product.reviews }})</span></div>
+              <div class="price-row">
+                <span class="old-price">{{ formatPrice(product.originalPrice) }}</span>
+                <strong>{{ formatPrice(product.discountPrice) }}</strong>
+              </div>
+              <button type="button" (click)="addToCart(product)">Adicionar ao carrinho</button>
+            </article>
+          }
+        </div>
+      </div>
+    </section>
+  </main>
+
+  @if (cartOpen) {
+    <aside class="cart-drawer">
+      <div class="cart-header">
+        <div>
+          <p>Seu carrinho</p>
+          <strong>{{ cartCount }} item(ns)</strong>
+        </div>
+        <button type="button" (click)="closeCart()">×</button>
+      </div>
+
+      <div class="cart-list">
+        @if (cartItems.length === 0) {
+          <p class="cart-empty">Seu carrinho está vazio.</p>
+        } @else {
+          @for (item of cartItems; track $index) {
+            <div class="cart-item">
+              <span>{{ item.name }}</span>
+              <strong>{{ formatPrice(item.discountPrice) }}</strong>
+            </div>
+          }
+        }
+      </div>
+
+      <div class="cart-total">
+        <span>Total</span>
+        <strong>{{ formatPrice(cartTotal) }}</strong>
+      </div>
+
+      @if (cartItems.length > 0) {
+        <button class="clear-cart-button" type="button" (click)="clearCart()">Esvaziar carrinho</button>
+      }
+    </aside>
+  }
+
+  <footer class="footer">
+    <div class="footer-links">
+      <a href="#">Eletrônicos</a>
+      <a href="#">Casa</a>
+      <a href="#">Moda</a>
+      <a href="#">Games</a>
+      <a href="#">Ajuda</a>
+    </div>
+    <p>© 2026 TechStore. Inspiração visual em grandes marketplaces, implementação em Angular.</p>
+  </footer>
+</div>
+
+

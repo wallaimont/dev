@@ -1,0 +1,35 @@
+task: classification
+
+data:
+  train_path: data/customer_churn_sample.csv
+  target_column: churned
+  test_size: 0.25
+  random_state: 42
+
+model:
+  name: pytorch_mlp_classifier
+  params:
+    hidden_dims: [64, 32]
+    epochs: 50
+    batch_size: 16
+    lr: 0.001
+    dropout: 0.1
+    random_state: 42
+
+training:
+  use_cv: true
+  cv_folds: 3
+  search_strategy: random
+  n_iter: 4
+  search_params:
+    epochs: [30, 50]
+    batch_size: [16, 32]
+    lr: [0.001, 0.0005]
+    dropout: [0.0, 0.1]
+  scoring: f1_weighted
+  n_jobs: 1
+
+output:
+  model_path: artifacts/model_pytorch.joblib
+  metrics_path: artifacts/metrics_pytorch.json
+  cv_results_path: artifacts/cv_results_pytorch.json

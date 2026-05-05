@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-training-system"
+version = "0.1.0"
+description = "Config-driven AI model training system for tabular data"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24.0",
+  "pandas>=2.0.0",
+  "scikit-learn>=1.3.0",
+  "PyYAML>=6.0.0",
+  "joblib>=1.3.0",
+  "fastapi>=0.111.0",
+  "uvicorn>=0.30.0",
+  "python-multipart>=0.0.9"
+]
+
+[project.optional-dependencies]
+torch = [
+  "torch>=2.2.0"
+]
+dev = [
+  "pytest>=8.0.0",
+  "httpx>=0.27.0"
+]
+redis = [
+  "redis>=5.0.0"
+]
+
+[project.scripts]
+ai-trainer = "ai_training.cli:main"
+ai-trainer-api = "ai_training.api:run"
+
+[tool.setuptools.packages.find]
+where = ["src"]

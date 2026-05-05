@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sinistros')}"></head>
+<body>
+<div class="main-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div class="main-content">
+        <div th:replace="~{fragments/layout :: topbar}"></div>
+        <div class="content-area">
+            <div class="page-header">
+                <div><h1 class="page-title">Sinistros</h1><p class="page-subtitle">Gest&#227;o de sinistros e indeniza&#231;&#245;es</p></div>
+                <button class="btn btn-primary" onclick="novoSinistro()"><i class="bi bi-plus-lg me-1"></i>Novo Sinistro</button>
+            </div>
+            <div class="table-container">
+                <div class="table-toolbar">
+                    <div class="table-filters">
+                        <select class="form-select" id="fStatus" onchange="loadSinistros()">
+                            <option value="">Todos os status</option>
+                            <option value="ABERTO">Aberto</option>
+                            <option value="EM_ANALISE">Em An&#225;lise</option>
+                            <option value="DOCUMENTACAO_PENDENTE">Doc. Pendente</option>
+                            <option value="INDENIZADO">Indenizado</option>
+                            <option value="NEGADO">Negado</option>
+                        </select>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadSinistros()"><i class="bi bi-search me-1"></i>Filtrar</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead><tr><th>N&#186;</th><th>Cliente</th><th>Seguradora</th><th>Data Aviso</th><th>Valor Est.</th><th>Status</th><th width="130">A&#231;&#245;es</th></tr></thead>
+                        <tbody id="tblData"><tr><td colspan="7" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Carregando...</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="table-pagination" id="pagination"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: toasts}"></div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>
+async function loadSinistros(page = 0) {
+    const params = new URLSearchParams({ page, size: 20 });
+    const status = document.getElementById('fStatus').value;
+    if (status) params.append('status', status);
+    try {
+        const res = await API.get('/sinistros?' + params);
+        const data = res.data;
+        const tb = document.getElementById('tblData');
+        if (data.content.length === 0) {
+            tb.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>Nenhum sinistro encontrado</td></tr>';
+        } else {
+            tb.innerHTML = data.content.map(s => `<tr>
+                <td><strong>${s.numeroSinistro}</strong></td>
+                <td>${s.clienteNome}</td>
+                <td>${s.seguradoraNome}</td>
+                <td>${formatDate(s.dataAviso)}</td>
+                <td>${formatCurrency(s.valorEstimado)}</td>
+                <td>${statusBadge(s.status)}</td>
+                <td>
+                    ${canEdit('sinistros') ? `<button class="btn btn-icon btn-outline-primary btn-sm me-1" onclick="editarSinistro(${s.id})" title="Editar"><i class="bi bi-pencil"></i></button>` : ''}
+                    ${canEdit('sinistros') ? `<button class="btn btn-icon btn-outline-warning btn-sm" onclick="alterarStatusSinistro(${s.id})" title="Status"><i class="bi bi-arrow-repeat"></i></button>` : ''}
+                </td>
+            </tr>`).join('');
+        }
+        document.getElementById('pagination').innerHTML = renderPagination(data, 'loadSinistros');
+    } catch (err) { showToast(err.message, 'danger'); }
+}
+
+function formSinistro(s = {}) {
+    return `<form id="formSinistro"><div class="row g-3">
+        <div class="col-md-4"><label class="form-label">Ap&#243;lice ID</label><input type="number" class="form-control" id="sApoliceId" value="${s.apoliceId || ''}" required></div>
+        <div class="col-md-4"><label class="form-label">N&#186; Sinistro Seguradora</label><input type="text" class="form-control" id="sNumeroSeg" value="${s.numeroSinistroSeguradora || ''}"></div>
+        <div class="col-md-4"><label class="form-label">Data Ocorr&#234;ncia</label><input type="text" class="form-control" id="sDataOcorrencia" value="${s.dataOcorrencia || ''}" placeholder="dd/mm/aaaa"></div>
+        <div class="col-md-4"><label class="form-label">Data Aviso</label><input type="text" class="form-control" id="sDataAviso" value="${s.dataAviso || ''}" placeholder="dd/mm/aaaa"></div>
+        <div class="col-md-4"><label class="form-label">Valor Estimado</label><input type="number" step="0.01" class="form-control" id="sValorEstimado" value="${s.valorEstimado || ''}"></div>
+        <div class="col-md-4"><label class="form-label">Valor Indenizado</label><input type="number" step="0.01" class="form-control" id="sValorIndenizado" value="${s.valorIndenizado || ''}"></div>
+        <div class="col-12"><label class="form-label">Descri&#231;&#227;o</label><textarea class="form-control" id="sDescricao" rows="2">${s.descricao || ''}</textarea></div>
+        <div class="col-12"><label class="form-label">Observa&#231;&#245;es</label><textarea class="form-control" id="sObs" rows="2">${s.observacoes || ''}</textarea></div>
+    </div></form>`;
+}
+
+function getSinistroData() {
+    return {
+        apoliceId: document.getElementById('sApoliceId').value,
+        numeroSinistroSeguradora: document.getElementById('sNumeroSeg').value,
+        dataOcorrencia: document.getElementById('sDataOcorrencia').value,
+        dataAviso: document.getElementById('sDataAviso').value,
+        valorEstimado: document.getElementById('sValorEstimado').value,
+        valorIndenizado: document.getElementById('sValorIndenizado').value,
+        descricao: document.getElementById('sDescricao').value,
+        observacoes: document.getElementById('sObs').value
+    };
+}
+
+function novoSinistro() {
+    showModal('Novo Sinistro', formSinistro(), async () => {
+        await API.post('/sinistros', getSinistroData());
+        showToast('Sinistro registrado com sucesso');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadSinistros();
+    }, 'lg');
+}
+
+async function editarSinistro(id) {
+    const res = await API.get('/sinistros/' + id);
+    showModal('Editar Sinistro', formSinistro(res.data), async () => {
+        await API.put('/sinistros/' + id, getSinistroData());
+        showToast('Sinistro atualizado');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadSinistros();
+    }, 'lg');
+}
+
+function alterarStatusSinistro(id) {
+    showModal('Alterar Status', `<select class="form-select" id="novoStatus">
+        <option value="ABERTO">Aberto</option><option value="EM_ANALISE">Em An\u00e1lise</option>
+        <option value="DOCUMENTACAO_PENDENTE">Doc. Pendente</option><option value="INDENIZADO">Indenizado</option><option value="NEGADO">Negado</option>
+    </select>`, async () => {
+        await API.patch('/sinistros/' + id + '/status?status=' + document.getElementById('novoStatus').value);
+        showToast('Status alterado');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadSinistros();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', loadSinistros);
+</script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: antifraud-payment-alerts
+    folder: Orbyt Marketplace
+    interval: 1m
+    rules:
+      - uid: orbyt-antifraud-reject-rate-high
+        title: Alta taxa de rejeicao antifraude
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              editorMode: code
+              expr: sum(rate(orbyt_fraud_analyses_total{decision="REJECTED"}[10m])) / clamp_min(sum(rate(orbyt_fraud_analyses_total[10m])), 0.0001)
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: __expr__
+            model:
+              expression: $A > 0.15
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+              type: math
+        noDataState: NoData
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: Mais de 15% das analises recentes estao sendo rejeitadas.
+          runbook_url: http://localhost:3001/d/orbyt-antifraud/antifraud-control
+        labels:
+          severity: warning
+          domain: antifraud
+      - uid: orbyt-payment-approval-drop
+        title: Queda na aprovacao de pagamentos
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 900
+              to: 0
+            datasourceUid: prometheus
+            model:
+              editorMode: code
+              expr: sum(rate(orbyt_payment_events_total{status="APPROVED"}[15m])) / clamp_min(sum(rate(orbyt_payment_events_total{status=~"APPROVED|CREATED"}[15m])), 0.0001)
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: __expr__
+            model:
+              expression: $A < 0.70
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+              type: math
+        noDataState: NoData
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: Taxa de aprovacao de pagamentos caiu abaixo de 70%.
+          runbook_url: http://localhost:3001/d/orbyt-payment/payment-operations
+        labels:
+          severity: critical
+          domain: payments

@@ -1,0 +1,27 @@
+{
+  "name": "orbitcrm",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace @orbitcrm/api\" \"npm run dev --workspace @orbitcrm/web\"",
+    "build": "npm run build --workspace @orbitcrm/api && npm run build --workspace @orbitcrm/web",
+    "lint": "npm run lint --workspace @orbitcrm/api && npm run lint --workspace @orbitcrm/web",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1",
+    "prisma": "^5.22.0",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  }
+}

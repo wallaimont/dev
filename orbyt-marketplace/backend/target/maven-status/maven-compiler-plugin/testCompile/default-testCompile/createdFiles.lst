@@ -1,0 +1,4 @@
+com\orbyt\marketplace\MarketplaceApplicationTests.class
+com\orbyt\marketplace\RbacIntegrationTest.class
+com\orbyt\marketplace\IntegrationTestBase.class
+com\orbyt\marketplace\AuthIntegrationTest.class

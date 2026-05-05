@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Seguradoras')}"></head>
+<body>
+<div class="main-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div class="main-content">
+        <div th:replace="~{fragments/layout :: topbar}"></div>
+        <div class="content-area">
+            <div class="page-header">
+                <div><h1 class="page-title">Seguradoras</h1><p class="page-subtitle">Cadastro de seguradoras parceiras</p></div>
+                <button class="btn btn-primary" onclick="novaSeguradora()"><i class="bi bi-plus-lg me-1"></i>Nova Seguradora</button>
+            </div>
+            <div class="table-container">
+                <div class="table-toolbar">
+                    <div class="table-filters">
+                        <input type="text" class="form-control" id="fNome" placeholder="Buscar por nome..." onkeyup="if(event.key==='Enter')loadSeguradoras()">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadSeguradoras()"><i class="bi bi-search me-1"></i>Buscar</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead><tr><th>Nome</th><th>CNPJ</th><th>C&#243;digo SUSEP</th><th>E-mail</th><th>Contato</th><th>Status</th><th width="100">A&#231;&#245;es</th></tr></thead>
+                        <tbody id="tblData"><tr><td colspan="7" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Carregando...</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="table-pagination" id="pagination"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: toasts}"></div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>
+async function loadSeguradoras(page = 0) {
+    const params = new URLSearchParams({ page, size: 20 });
+    const nome = document.getElementById('fNome').value;
+    if (nome) params.append('nome', nome);
+    try {
+        const res = await API.get('/seguradoras?' + params);
+        const data = res.data;
+        const tb = document.getElementById('tblData');
+        if (data.content.length === 0) {
+            tb.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>Nenhuma seguradora encontrada</td></tr>';
+        } else {
+            tb.innerHTML = data.content.map(s => `<tr>
+                <td><strong>${s.nome}</strong></td>
+                <td><code>${s.cnpj || '-'}</code></td>
+                <td>${s.codigoSusep || '-'}</td>
+                <td>${s.email || '-'}</td>
+                <td>${s.telefone || '-'}</td>
+                <td>${statusBadge(s.ativo ? 'ATIVO' : 'INATIVO')}</td>
+                <td>
+                    ${canEdit('seguradoras') ? `<button class="btn btn-icon btn-outline-primary btn-sm me-1" onclick="editarSeguradora(${s.id})" title="Editar"><i class="bi bi-pencil"></i></button>` : ''}
+                    ${canDelete('seguradoras') ? `<button class="btn btn-icon btn-outline-danger btn-sm" onclick="inativarSeguradora(${s.id})" title="Inativar"><i class="bi bi-trash"></i></button>` : ''}
+                </td>
+            </tr>`).join('');
+        }
+        document.getElementById('pagination').innerHTML = renderPagination(data, 'loadSeguradoras');
+    } catch (err) { showToast(err.message, 'danger'); }
+}
+
+function formSeguradora(s = {}) {
+    return `<form id="formSeguradora"><div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Nome</label><input type="text" class="form-control" id="sNome" value="${s.nome || ''}" required></div>
+        <div class="col-md-6"><label class="form-label">CNPJ</label><input type="text" class="form-control" id="sCnpj" value="${s.cnpj || ''}" required></div>
+        <div class="col-md-4"><label class="form-label">C&#243;digo SUSEP</label><input type="text" class="form-control" id="sSusep" value="${s.codigoSusep || ''}"></div>
+        <div class="col-md-4"><label class="form-label">E-mail</label><input type="email" class="form-control" id="sEmail" value="${s.email || ''}"></div>
+        <div class="col-md-4"><label class="form-label">Telefone</label><input type="text" class="form-control" id="sTelefone" value="${s.telefone || ''}"></div>
+        <div class="col-12"><label class="form-label">Endere&#231;o</label><input type="text" class="form-control" id="sEndereco" value="${s.endereco || ''}"></div>
+        <div class="col-12"><label class="form-label">Observa&#231;&#245;es</label><textarea class="form-control" id="sObs" rows="2">${s.observacoes || ''}</textarea></div>
+    </div></form>`;
+}
+
+function getSeguradoraData() {
+    return {
+        nome: document.getElementById('sNome').value,
+        cnpj: document.getElementById('sCnpj').value,
+        codigoSusep: document.getElementById('sSusep').value,
+        email: document.getElementById('sEmail').value,
+        telefone: document.getElementById('sTelefone').value,
+        endereco: document.getElementById('sEndereco').value,
+        observacoes: document.getElementById('sObs').value
+    };
+}
+
+function novaSeguradora() {
+    showModal('Nova Seguradora', formSeguradora(), async () => {
+        await API.post('/seguradoras', getSeguradoraData());
+        showToast('Seguradora cadastrada com sucesso');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadSeguradoras();
+    });
+}
+
+async function editarSeguradora(id) {
+    const res = await API.get('/seguradoras/' + id);
+    showModal('Editar Seguradora', formSeguradora(res.data), async () => {
+        await API.put('/seguradoras/' + id, getSeguradoraData());
+        showToast('Seguradora atualizada');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadSeguradoras();
+    });
+}
+
+async function inativarSeguradora(id) {
+    if (!confirm('Deseja inativar esta seguradora?')) return;
+    await API.del('/seguradoras/' + id);
+    showToast('Seguradora inativada');
+    loadSeguradoras();
+}
+
+document.addEventListener('DOMContentLoaded', loadSeguradoras);
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Folha/planta estilizada -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,28 C54,28 38,42 38,58 C38,66.84 45.16,74 54,74 C62.84,74 70,66.84 70,58 C70,42 54,28 54,28Z" />
+    <path
+        android:fillColor="#388E3C"
+        android:pathData="M54,38 L54,68 M46,52 L54,44 M62,56 L54,48"
+        android:strokeWidth="2.5"
+        android:strokeColor="#388E3C" />
+</vector>

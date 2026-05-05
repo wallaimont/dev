@@ -1,0 +1,54 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$primary: mat.m2-define-palette(mat.$m2-indigo-palette, 700);
+$accent:  mat.m2-define-palette(mat.$m2-blue-palette, A200);
+$warn:    mat.m2-define-palette(mat.$m2-red-palette);
+
+$theme: mat.m2-define-light-theme((
+  color: (primary: $primary, accent: $accent, warn: $warn),
+  typography: mat.m2-define-typography-config(),
+  density: 0
+));
+
+@include mat.all-component-themes($theme);
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background: #f5f5f5;
+  color: #212121;
+  height: 100vh;
+}
+
+.spacer { flex: 1 1 auto; }
+
+.status-chip {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+
+  &.OPEN       { background: #e3f2fd; color: #1565c0; }
+  &.IN_PROGRESS{ background: #fff3e0; color: #e65100; }
+  &.RESOLVED   { background: #e8f5e9; color: #2e7d32; }
+  &.CLOSED     { background: #efefef; color: #616161; }
+  &.CANCELLED  { background: #fce4ec; color: #880e4f; }
+}
+
+.priority-chip {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+
+  &.LOW      { background: #e8f5e9; color: #388e3c; }
+  &.MEDIUM   { background: #fff3e0; color: #f57c00; }
+  &.HIGH     { background: #fce4ec; color: #c62828; }
+  &.CRITICAL { background: #880e4f; color: #ffffff; }
+}

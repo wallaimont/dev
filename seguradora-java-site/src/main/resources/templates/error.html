@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Vida Seguros | Erro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header class="subhero">
+    <nav class="navbar">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-icon"><i class="bi bi-shield-fill-check"></i></span>
+            Nova Vida Seguros
+        </a>
+        <div class="nav-links dark-links">
+            <a th:href="@{/}">Início</a>
+            <a th:href="@{/seguros}">Seguros</a>
+            <a th:href="@{/cotacao}">Cotação</a>
+            <a th:href="@{/contato}">Contato</a>
+        </div>
+    </nav>
+    <div class="page-hero-copy">
+        <span class="section-tag"><i class="bi bi-exclamation-triangle"></i> Erro</span>
+        <h1>Algo não saiu como esperado.</h1>
+        <p th:text="${errorMessage} ?: 'Ocorreu um erro inesperado. Por favor, tente novamente.'"></p>
+    </div>
+</header>
+
+<main>
+    <section class="section">
+        <div class="error-content">
+            <div class="error-icon"><i class="bi bi-exclamation-triangle"></i></div>
+            <h2>Página não encontrada</h2>
+            <p>Verifique o endereço digitado ou volte à página inicial para continuar navegando.</p>
+            <a class="primary-button dark" th:href="@{/}"><i class="bi bi-house-door"></i> Voltar para o início</a>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/footer :: site-footer}"></footer>
+</body>
+</html>

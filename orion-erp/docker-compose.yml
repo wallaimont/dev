@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: orionerp
+      POSTGRES_USER: orion
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-orion_secret_2024}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orion -d orionerp"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/orionerp
+      SPRING_DATASOURCE_USERNAME: orion
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-orion_secret_2024}
+      SPRING_FLYWAY_ENABLED: "true"
+      JWT_SECRET: ${JWT_SECRET:-orion-erp-jwt-secret-change-in-production-2024}
+      SPRING_PROFILES_ACTIVE: ${PROFILE:-prod}
+      SERVER_PORT: "8080"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: orionerp
+      DB_USER: orion
+      DB_PASS: ${DB_PASSWORD:-orion_secret_2024}
+      CORS_ORIGINS: "http://localhost:3001,http://localhost:3000,http://localhost:5173"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pgdata:

@@ -1,0 +1,12 @@
+.env
+*.log
+node_modules/
+target/
+dist/
+.angular/
+.idea/
+*.iml
+.vscode/
+*.class
+*.jar
+!gradle-wrapper.jar

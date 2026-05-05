@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="site-footer" class="site-footer">
+    <div class="footer-content">
+        <div class="footer-brand">
+            <a class="brand" th:href="@{/}">
+                <span class="brand-icon"><i class="bi bi-shield-fill-check"></i></span>
+                Nova Vida Seguros
+            </a>
+            <p>Proteção inteligente para cada fase da vida. Corretora registrada e autorizada pela SUSEP.</p>
+        </div>
+        <div class="footer-col">
+            <h4>Navegação</h4>
+            <a th:href="@{/}">Início</a>
+            <a th:href="@{/seguros}">Seguros</a>
+            <a th:href="@{/cotacao}">Cotação</a>
+            <a th:href="@{/contato}">Contato</a>
+        </div>
+        <div class="footer-col">
+            <h4>Produtos</h4>
+            <a th:href="@{/cotacao(tipo='Seguro Auto')}">Seguro Auto</a>
+            <a th:href="@{/cotacao(tipo='Seguro Residencial')}">Seguro Residencial</a>
+            <a th:href="@{/cotacao(tipo='Seguro Empresarial')}">Seguro Empresarial</a>
+            <a th:href="@{/cotacao(tipo='Seguro de Vida')}">Seguro de Vida</a>
+        </div>
+        <div class="footer-col">
+            <h4>Contato</h4>
+            <p><i class="bi bi-envelope"></i> contato@novavidaseguros.com.br</p>
+            <p><i class="bi bi-telephone"></i> (11) 4000-2026</p>
+            <p><i class="bi bi-clock"></i> Seg — Sex, 8h às 18h</p>
+        </div>
+    </div>
+    <div class="footer-compliance">
+        <div class="compliance-badge"><i class="bi bi-shield-lock"></i> Dados protegidos por SSL</div>
+        <div class="compliance-badge"><i class="bi bi-patch-check"></i> SUSEP autorizada</div>
+        <div class="compliance-badge"><i class="bi bi-file-earmark-lock"></i> Conforme LGPD</div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2026 Nova Vida Seguros. Todos os direitos reservados. CNPJ: 00.000.000/0001-00</p>
+        <div>
+            <a href="#">Política de Privacidade</a> &nbsp;·&nbsp; <a href="#">Termos de Uso</a>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

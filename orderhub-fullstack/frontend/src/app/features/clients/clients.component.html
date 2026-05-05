@@ -1,0 +1,32 @@
+<div class="container">
+  <h1 style="margin-bottom: 20px;">Clientes</h1>
+
+  <div class="card" style="margin-bottom: 20px;">
+    <h3 style="margin-bottom: 16px;">Novo cliente</h3>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
+      <div><label>Nome</label><input formControlName="name"></div>
+      <div><label>E-mail</label><input formControlName="email"></div>
+      <div><label>Telefone</label><input formControlName="phone"></div>
+      <div><label>Documento</label><input formControlName="document"></div>
+      <div><button class="btn btn-primary" type="submit">Salvar cliente</button></div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Lista de clientes</h3>
+    <table class="table">
+      <thead>
+        <tr><th>ID</th><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Ativo</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let client of clients">
+          <td>{{ client.id }}</td>
+          <td>{{ client.name }}</td>
+          <td>{{ client.email }}</td>
+          <td>{{ client.phone }}</td>
+          <td>{{ client.active ? 'Sim' : 'Não' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

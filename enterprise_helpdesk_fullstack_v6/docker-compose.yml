@@ -1,0 +1,43 @@
+services:
+  api:
+    build: .
+    container_name: enterprise_helpdesk_api
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - uploads_data:/app/uploads
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    container_name: enterprise_helpdesk_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_URL: http://localhost:8000/api/v1
+      VITE_WS_URL: ws://localhost:8000/ws/events?channel=tickets
+    volumes:
+      - ./frontend:/frontend
+      - /frontend/node_modules
+    depends_on:
+      - api
+
+  db:
+    image: postgres:16
+    container_name: enterprise_helpdesk_db
+    environment:
+      POSTGRES_DB: helpdesk_db
+      POSTGRES_USER: helpdesk
+      POSTGRES_PASSWORD: helpdesk
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+  uploads_data:

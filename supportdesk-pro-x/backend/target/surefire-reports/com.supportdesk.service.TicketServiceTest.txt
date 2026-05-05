@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.supportdesk.service.TicketServiceTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.312 s -- in com.supportdesk.service.TicketServiceTest

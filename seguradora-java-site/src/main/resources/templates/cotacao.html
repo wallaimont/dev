@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Vida Seguros | Cotação</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header class="subhero">
+    <nav class="navbar">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-icon"><i class="bi bi-shield-fill-check"></i></span>
+            Nova Vida Seguros
+        </a>
+        <div class="nav-links dark-links">
+            <a th:href="@{/}" th:classappend="${currentPage == 'home'} ? ' active' : ''">Início</a>
+            <a th:href="@{/seguros}" th:classappend="${currentPage == 'seguros'} ? ' active' : ''">Seguros</a>
+            <a th:href="@{/cotacao}" th:classappend="${currentPage == 'cotacao'} ? ' active' : ''">Cotação</a>
+            <a th:href="@{/contato}" th:classappend="${currentPage == 'contato'} ? ' active' : ''">Contato</a>
+        </div>
+    </nav>
+    <div class="page-hero-copy">
+        <span class="section-tag"><i class="bi bi-calculator"></i> Simulador online</span>
+        <h1>Gere uma estimativa inicial em segundos.</h1>
+        <p>Preencha os dados abaixo para receber uma projeção de valor mensal e franquia estimada.</p>
+    </div>
+</header>
+
+<main>
+    <section class="section split-layout align-start">
+        <form class="contact-form" th:action="@{/cotacao}" th:object="${leadRequest}" method="post">
+            <div class="error-banner" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+            <ul class="error-banner" th:if="${errorSummary != null and !#lists.isEmpty(errorSummary)}">
+                <li th:each="error : ${errorSummary}" th:text="${error}"></li>
+            </ul>
+
+            <div class="form-row">
+                <label>
+                    Nome
+                    <input type="text" th:field="*{nome}" placeholder="Seu nome completo" required>
+                    <span class="field-error" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
+                </label>
+                <label>
+                    E-mail
+                    <input type="email" th:field="*{email}" placeholder="voce@empresa.com" required>
+                    <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                </label>
+            </div>
+
+            <div class="form-row">
+                <label>
+                    Telefone
+                    <input type="text" th:field="*{telefone}" placeholder="(11) 99999-9999" required>
+                    <span class="field-error" th:if="${#fields.hasErrors('telefone')}" th:errors="*{telefone}"></span>
+                </label>
+                <label>
+                    Tipo de seguro
+                    <select th:field="*{tipoSeguro}">
+                        <option th:each="tipo : ${tiposSeguro}" th:value="${tipo}" th:text="${tipo}"></option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="form-row">
+                <label>
+                    Cobertura
+                    <select th:field="*{cobertura}">
+                        <option th:each="cobertura : ${coberturas}" th:value="${cobertura}" th:text="${cobertura}"></option>
+                    </select>
+                </label>
+                <label>
+                    Valor aproximado do bem
+                    <input type="number" min="1000" step="0.01" th:field="*{valorBem}" placeholder="50000" required>
+                    <span class="field-error" th:if="${#fields.hasErrors('valorBem')}" th:errors="*{valorBem}"></span>
+                </label>
+            </div>
+
+            <label>
+                Observações
+                <textarea rows="4" th:field="*{mensagem}" placeholder="Informe detalhes importantes para a proposta"></textarea>
+                <span class="field-error" th:if="${#fields.hasErrors('mensagem')}" th:errors="*{mensagem}"></span>
+            </label>
+            <input type="hidden" th:field="*{origem}">
+            <input type="hidden" th:field="*{submissionToken}">
+            <button type="submit"><i class="bi bi-calculator"></i> Calcular cotação</button>
+        </form>
+
+        <div class="quote-panel">
+            <div class="success-banner" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="quote-empty" th:if="${quoteResult == null}">
+                <span class="section-tag"><i class="bi bi-info-circle"></i> O que você recebe</span>
+                <h2 style="font-size:1.3rem;margin-top:8px;">Resultado da simulação</h2>
+                <ul>
+                    <li><i class="bi bi-check-circle-fill"></i> Estimativa mensal inicial</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Faixa de franquia prevista</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Prazo de retorno do consultor</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Comparativo de coberturas</li>
+                </ul>
+            </div>
+            <div class="quote-result" th:if="${quoteResult != null}">
+                <span class="section-tag"><i class="bi bi-receipt"></i> Resumo inicial</span>
+                <h2 th:text="${quoteResult.tipoSeguro}"></h2>
+                <div class="quote-metrics">
+                    <div>
+                        <small>Mensal estimada</small>
+                        <strong th:text="'R$ ' + ${#numbers.formatDecimal(quoteResult.valorMensal, 1, 'POINT', 2, 'COMMA')}"></strong>
+                    </div>
+                    <div>
+                        <small>Franquia estimada</small>
+                        <strong th:text="'R$ ' + ${#numbers.formatDecimal(quoteResult.franquia, 1, 'POINT', 2, 'COMMA')}"></strong>
+                    </div>
+                </div>
+                <div class="quote-details">
+                    <p><strong>Cobertura:</strong> <span th:text="${quoteResult.cobertura}"></span></p>
+                    <p><strong>Retorno comercial:</strong> <span th:text="${quoteResult.prazoRetorno}"></span></p>
+                    <p><strong>Próximo passo:</strong> nosso time valida perfil de risco e personaliza a proposta final.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/footer :: site-footer}"></footer>
+</body>
+</html>

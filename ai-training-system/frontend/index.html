@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Training Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+
+    <header class="hero">
+      <p class="eyebrow">AI TRAINING SYSTEM</p>
+      <h1>Console de Treino e Inferencia</h1>
+      <p class="subtitle">Controle o ciclo completo do modelo: treino, upload, previsao e validacao de API.</p>
+    </header>
+
+    <main class="grid">
+      <section class="card config-card">
+        <h2>Conexao</h2>
+        <div class="field">
+          <label for="apiBase">Base URL</label>
+          <input id="apiBase" type="text" value="http://127.0.0.1:8000" />
+        </div>
+        <div class="field">
+          <label for="apiToken">Token API</label>
+          <input id="apiToken" type="text" value="dev-token" />
+        </div>
+        <div class="actions">
+          <button id="healthBtn" class="btn btn-ghost">Testar /health</button>
+          <button id="saveConfigBtn" class="btn">Salvar localmente</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Treino por arquivo de configuracao</h2>
+        <div class="field">
+          <label for="configPath">Caminho do config no servidor</label>
+          <input id="configPath" type="text" value="config.example.yaml" />
+        </div>
+        <button id="trainBtn" class="btn">Executar treino</button>
+      </section>
+
+      <section class="card wide">
+        <h2>Treino com upload de CSV</h2>
+        <div class="field">
+          <label for="uploadConfig">Config JSON</label>
+          <textarea id="uploadConfig" rows="8"></textarea>
+        </div>
+        <div class="field">
+          <label for="trainCsvFile">CSV de treino</label>
+          <input id="trainCsvFile" type="file" accept=".csv,text/csv" />
+        </div>
+        <button id="trainUploadBtn" class="btn">Treinar via upload</button>
+      </section>
+
+      <section class="card wide">
+        <h2>Predicao por registros JSON</h2>
+        <div class="field two-cols">
+          <div>
+            <label for="modelPath">Caminho do modelo</label>
+            <input id="modelPath" type="text" value="artifacts/model.joblib" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="recordsJson">Registros</label>
+          <textarea id="recordsJson" rows="8"></textarea>
+        </div>
+        <button id="predictRecordsBtn" class="btn">Prever registros</button>
+      </section>
+
+      <section class="card wide">
+        <h2>Predicao com upload CSV</h2>
+        <div class="field">
+          <label for="predictCsvFile">CSV para prever</label>
+          <input id="predictCsvFile" type="file" accept=".csv,text/csv" />
+        </div>
+        <div class="field">
+          <label for="expectedColumns">expected_columns_json (opcional)</label>
+          <textarea id="expectedColumns" rows="3" placeholder='["age","monthly_spend","contract_months","support_tickets","payment_method"]'></textarea>
+        </div>
+        <button id="predictUploadBtn" class="btn">Prever via upload</button>
+      </section>
+
+      <section class="card result-card wide">
+        <h2>Resposta</h2>
+        <pre id="resultBox">Pronto para chamar a API.</pre>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

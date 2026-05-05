@@ -1,0 +1,19 @@
+{
+  "task": "classification",
+  "model": "random_forest",
+  "data_rows": 20,
+  "feature_count": 5,
+  "numeric_features": [
+    "age",
+    "monthly_spend",
+    "contract_months",
+    "support_tickets"
+  ],
+  "categorical_features": [
+    "payment_method"
+  ],
+  "metrics": {
+    "accuracy": 1.0,
+    "f1_weighted": 1.0
+  }
+}

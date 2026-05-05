@@ -1,0 +1,14 @@
+# Backend
+backend/target/
+backend/.mvn/
+backend/*.log
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# General
+.vscode/
+.idea/
+.DS_Store

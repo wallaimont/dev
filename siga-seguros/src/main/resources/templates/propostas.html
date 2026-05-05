@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Propostas')}"></head>
+<body>
+<div class="main-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div class="main-content">
+        <div th:replace="~{fragments/layout :: topbar}"></div>
+        <div class="content-area">
+            <div class="page-header">
+                <div><h1 class="page-title">Propostas</h1><p class="page-subtitle">Gest&#227;o de propostas comerciais</p></div>
+                <button class="btn btn-primary" onclick="novaProposta()"><i class="bi bi-plus-lg me-1"></i>Nova Proposta</button>
+            </div>
+            <div class="table-container">
+                <div class="table-toolbar">
+                    <div class="table-filters">
+                        <select class="form-select" id="fStatus" onchange="loadPropostas()">
+                            <option value="">Todos os status</option>
+                            <option value="EM_COTACAO">Em Cota&#231;&#227;o</option>
+                            <option value="ENVIADA">Enviada</option>
+                            <option value="APROVADA">Aprovada</option>
+                            <option value="RECUSADA">Recusada</option>
+                            <option value="CANCELADA">Cancelada</option>
+                        </select>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadPropostas()"><i class="bi bi-search me-1"></i>Filtrar</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead><tr><th>N&#186;</th><th>Cliente</th><th>Seguradora</th><th>Ramo</th><th>Pr&#234;mio</th><th>Status</th><th width="130">A&#231;&#245;es</th></tr></thead>
+                        <tbody id="tblData"><tr><td colspan="7" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Carregando...</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="table-pagination" id="pagination"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: toasts}"></div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>
+async function loadPropostas(page = 0) {
+    const params = new URLSearchParams({ page, size: 20 });
+    const status = document.getElementById('fStatus').value;
+    if (status) params.append('status', status);
+    try {
+        const res = await API.get('/propostas?' + params);
+        const data = res.data;
+        const tb = document.getElementById('tblData');
+        if (data.content.length === 0) {
+            tb.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>Nenhuma proposta</td></tr>';
+        } else {
+            tb.innerHTML = data.content.map(p => `<tr>
+                <td><strong>${p.numeroProposta}</strong></td>
+                <td>${p.clienteNome}</td>
+                <td>${p.seguradoraNome}</td>
+                <td>${p.ramoSeguroNome || '-'}</td>
+                <td>${formatCurrency(p.premioTotal)}</td>
+                <td>${statusBadge(p.status)}</td>
+                <td>
+                    ${canEdit('propostas') ? `<button class="btn btn-icon btn-outline-primary btn-sm me-1" onclick="editarProposta(${p.id})" title="Editar"><i class="bi bi-pencil"></i></button>` : ''}
+                    ${canEdit('propostas') ? `<button class="btn btn-icon btn-outline-warning btn-sm me-1" onclick="alterarStatusProposta(${p.id})" title="Status"><i class="bi bi-arrow-repeat"></i></button>` : ''}
+                    ${canDelete('propostas') ? `<button class="btn btn-icon btn-outline-danger btn-sm" onclick="inativarProposta(${p.id})" title="Excluir"><i class="bi bi-trash"></i></button>` : ''}
+                </td>
+            </tr>`).join('');
+        }
+        document.getElementById('pagination').innerHTML = renderPagination(data, 'loadPropostas');
+    } catch (err) { showToast(err.message, 'danger'); }
+}
+
+function formProposta(p = {}) {
+    return `<form id="formProposta"><div class="row g-3">
+        <div class="col-md-4"><label class="form-label">Cliente ID</label><input type="number" class="form-control" id="pClienteId" value="${p.clienteId || ''}" required></div>
+        <div class="col-md-4"><label class="form-label">Seguradora ID</label><input type="number" class="form-control" id="pSeguradoraId" value="${p.seguradoraId || ''}" required></div>
+        <div class="col-md-4"><label class="form-label">Ramo ID</label><input type="number" class="form-control" id="pRamoId" value="${p.ramoSeguroId || ''}" required></div>
+        <div class="col-md-4"><label class="form-label">Corretora ID</label><input type="number" class="form-control" id="pCorretoraId" value="${p.corretoraId || ''}"></div>
+        <div class="col-md-4"><label class="form-label">Vig&#234;ncia Inicial</label><input type="text" class="form-control" id="pVigIni" value="${p.vigenciaInicial || ''}" placeholder="dd/mm/aaaa"></div>
+        <div class="col-md-4"><label class="form-label">Vig&#234;ncia Final</label><input type="text" class="form-control" id="pVigFim" value="${p.vigenciaFinal || ''}" placeholder="dd/mm/aaaa"></div>
+        <div class="col-md-4"><label class="form-label">Pr&#234;mio L&#237;quido</label><input type="number" step="0.01" class="form-control" id="pPremioLiquido" value="${p.premioLiquido || ''}"></div>
+        <div class="col-md-4"><label class="form-label">Pr&#234;mio Total</label><input type="number" step="0.01" class="form-control" id="pPremioTotal" value="${p.premioTotal || ''}"></div>
+        <div class="col-md-4"><label class="form-label">% Comiss&#227;o</label><input type="number" step="0.01" class="form-control" id="pPercComissao" value="${p.percentualComissao || ''}"></div>
+        <div class="col-md-6"><label class="form-label">Respons&#225;vel Interno</label><input type="text" class="form-control" id="pResponsavel" value="${p.responsavelInterno || ''}"></div>
+        <div class="col-12"><label class="form-label">Observa&#231;&#245;es</label><textarea class="form-control" id="pObs" rows="2">${p.observacoes || ''}</textarea></div>
+    </div></form>`;
+}
+
+function getPropostaData() {
+    return {
+        clienteId: document.getElementById('pClienteId').value,
+        seguradoraId: document.getElementById('pSeguradoraId').value,
+        ramoSeguroId: document.getElementById('pRamoId').value,
+        corretoraId: document.getElementById('pCorretoraId').value || null,
+        vigenciaInicial: document.getElementById('pVigIni').value,
+        vigenciaFinal: document.getElementById('pVigFim').value,
+        premioLiquido: document.getElementById('pPremioLiquido').value,
+        premioTotal: document.getElementById('pPremioTotal').value,
+        percentualComissao: document.getElementById('pPercComissao').value,
+        responsavelInterno: document.getElementById('pResponsavel').value,
+        observacoes: document.getElementById('pObs').value
+    };
+}
+
+function novaProposta() {
+    showModal('Nova Proposta', formProposta(), async () => {
+        await API.post('/propostas', getPropostaData());
+        showToast('Proposta criada com sucesso');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadPropostas();
+    }, 'lg');
+}
+
+async function editarProposta(id) {
+    const res = await API.get('/propostas/' + id);
+    showModal('Editar Proposta', formProposta(res.data), async () => {
+        await API.put('/propostas/' + id, getPropostaData());
+        showToast('Proposta atualizada');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadPropostas();
+    }, 'lg');
+}
+
+function alterarStatusProposta(id) {
+    showModal('Alterar Status', `<select class="form-select" id="novoStatus">
+        <option value="EM_COTACAO">Em Cota\u00e7\u00e3o</option><option value="ENVIADA">Enviada</option>
+        <option value="APROVADA">Aprovada</option><option value="RECUSADA">Recusada</option><option value="CANCELADA">Cancelada</option>
+    </select>`, async () => {
+        await API.patch('/propostas/' + id + '/status?status=' + document.getElementById('novoStatus').value);
+        showToast('Status alterado');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadPropostas();
+    });
+}
+
+async function inativarProposta(id) {
+    if (!confirm('Deseja inativar esta proposta?')) return;
+    await API.del('/propostas/' + id);
+    showToast('Proposta inativada');
+    loadPropostas();
+}
+
+document.addEventListener('DOMContentLoaded', loadPropostas);
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+ALTER TABLE fraud_blacklist
+    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ADD COLUMN IF NOT EXISTS updated_by UUID,
+    ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ,
+    ADD COLUMN IF NOT EXISTS active BOOLEAN NOT NULL DEFAULT TRUE;
+
+UPDATE fraud_blacklist
+SET active = COALESCE(active, status = 'ACTIVE');

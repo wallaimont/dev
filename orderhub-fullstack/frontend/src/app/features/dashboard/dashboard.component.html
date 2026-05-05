@@ -1,0 +1,11 @@
+<div class="container">
+  <h1 style="margin-bottom: 20px;">Dashboard</h1>
+  <div class="grid grid-3">
+    <div class="card"><h3>Clientes</h3><p style="font-size: 32px; margin-top: 12px;">{{ summary.clients || 0 }}</p></div>
+    <div class="card"><h3>Produtos</h3><p style="font-size: 32px; margin-top: 12px;">{{ summary.products || 0 }}</p></div>
+    <div class="card"><h3>Pedidos</h3><p style="font-size: 32px; margin-top: 12px;">{{ summary.orders || 0 }}</p></div>
+    <div class="card"><h3>Pendentes</h3><p style="font-size: 32px; margin-top: 12px;">{{ summary.pendingOrders || 0 }}</p></div>
+    <div class="card"><h3>Faturados</h3><p style="font-size: 32px; margin-top: 12px;">{{ summary.billedOrders || 0 }}</p></div>
+    <div class="card"><h3>Entregues</h3><p style="font-size: 32px; margin-top: 12px;">{{ summary.deliveredOrders || 0 }}</p></div>
+  </div>
+</div>

@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DOOM-RL</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:'Courier New',monospace;overflow:hidden;user-select:none}
+#wrap{position:relative;width:640px}
+canvas{display:block;image-rendering:pixelated}
+#hud{position:absolute;bottom:0;left:0;width:100%;height:64px;background:#111;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-top:3px solid #900}
+.hud-face{width:48px;height:48px;background:#c80;border:2px solid #600;display:flex;align-items:center;justify-content:center;font-size:28px;border-radius:4px}
+.hud-stat{color:#f00;font-size:11px;text-align:center}
+.hud-stat span{display:block;font-size:20px;color:#ff0;font-weight:bold}
+#msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#f00;font-size:32px;font-weight:bold;text-shadow:0 0 10px #f00;display:none;text-align:center}
+#crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:20px;height:20px;pointer-events:none}
+#crosshair::before,#crosshair::after{content:'';position:absolute;background:#fff8;border-radius:2px}
+#crosshair::before{width:2px;height:14px;left:9px;top:3px}
+#crosshair::after{width:14px;height:2px;left:3px;top:9px}
+#minimap{position:absolute;top:8px;right:8px;opacity:0.85}
+#info{position:absolute;top:8px;left:8px;color:#ff0;font-size:10px;line-height:1.6;background:#0006;padding:4px 6px;border-radius:4px}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c" width="640" height="400"></canvas>
+  <div id="minimap"><canvas id="mc" width="120" height="120"></canvas></div>
+  <div id="crosshair"></div>
+  <div id="info">WASD/SETAS: Mover<br>A/D ou ←/→: Girar<br>ESPAÇO/CLICK: Atirar<br>ESC: Pointer Lock</div>
+  <div id="hud">
+    <div class="hud-stat">PONTOS<span id="score">0</span></div>
+    <div class="hud-stat">SAÚDE<span id="health">100</span>%</div>
+    <div class="hud-face" id="face">😐</div>
+    <div class="hud-stat">BALAS<span id="ammo">50</span></div>
+    <div class="hud-stat">INIMIGOS<span id="kills">0</span></div>
+  </div>
+  <div id="msg" id="msg"></div>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const mc = document.getElementById('mc');
+const mctx = mc.getContext('2d');
+const W = 640, H = 400;
+const MW = 120, MH = 120;
+
+// ─── MAP ──────────────────────────────────────────────────────────────────────
+const MAP = [
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,1,1,0,0,1,0,1,1,1,0,1,0,0,1,0,1,0,1],
+  [1,0,1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,1,0,1],
+  [1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,1],
+  [1,0,1,0,1,0,1,1,1,0,1,0,0,0,0,1,0,1,0,1],
+  [1,0,1,0,1,0,0,0,1,0,1,0,1,1,0,0,0,1,0,1],
+  [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1],
+  [1,0,1,1,0,0,1,0,1,1,1,1,1,0,0,1,0,1,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,1,0,1,1,0,1,1,1,1,0,1,1,1,0,1,1,0,1,1],
+  [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1],
+  [1,0,1,0,0,0,1,0,1,1,1,1,0,1,0,0,0,1,0,1],
+  [1,0,1,0,1,0,1,0,1,0,0,0,0,1,0,1,0,1,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,1,1,0,1,1,1,1,0,1,0,1,1,1,0,1,1,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,1,0,1,1,0,1,0,1,1,1,0,1,0,1,1,0,1,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+];
+const ROWS = MAP.length, COLS = MAP[0].length;
+function isWall(x, y) {
+  const mx = Math.floor(x), my = Math.floor(y);
+  if (mx < 0 || my < 0 || mx >= COLS || my >= ROWS) return true;
+  return MAP[my][mx] === 1;
+}
+
+// ─── PLAYER ──────────────────────────────────────────────────────────────────
+const player = { x: 1.5, y: 1.5, angle: 0, health: 100, ammo: 50, score: 0, kills: 0, speed: 0.06, rotSpeed: 0.04 };
+const keys = {};
+
+// ─── ENEMIES ─────────────────────────────────────────────────────────────────
+const ENEMY_POS = [[5,3],[10,5],[15,3],[3,10],[8,12],[14,10],[5,16],[12,16],[17,14],[9,9],[16,7],[4,7]];
+const enemies = ENEMY_POS.map(([x,y],i) => ({
+  x: x+0.5, y: y+0.5, health: 40, alive: true, state:'patrol',
+  angle: Math.random()*Math.PI*2, speed: 0.015+Math.random()*0.01,
+  attackTimer: 0, frame: 0, frameTimer: 0,
+  patrolAngle: Math.random()*Math.PI*2,
+  alertTimer: 0
+}));
+
+// ─── BULLETS / EFFECTS ───────────────────────────────────────────────────────
+let bullets = [];
+let effects = [];
+let shootCooldown = 0;
+let hitFlash = 0;
+let muzzleFlash = 0;
+let gunFrame = 0; // 0=idle,1=shoot1,2=shoot2
+let gunTimer = 0;
+
+// ─── TEXTURES ────────────────────────────────────────────────────────────────
+// Generate procedural wall textures
+function makeWallTex(size, r, g, b) {
+  const off = new OffscreenCanvas(size, size);
+  const c = off.getContext('2d');
+  const id = c.createImageData(size, size);
+  const d = id.data;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const i = (y * size + x) * 4;
+      // brick pattern
+      let bx = x % 32, by = y % 16;
+      let mortar = (by < 2) || (bx < 2 && (Math.floor(y/16)%2===0)) || (bx+16 < 2 && (Math.floor(y/16)%2===1));
+      let n = (Math.random()*0.15 - 0.075);
+      d[i]   = Math.min(255, mortar ? 60  : r + n*128);
+      d[i+1] = Math.min(255, mortar ? 55  : g + n*128);
+      d[i+2] = Math.min(255, mortar ? 50  : b + n*128);
+      d[i+3] = 255;
+    }
+  }
+  c.putImageData(id, 0, 0);
+  return off;
+}
+const wallTex = makeWallTex(64, 140, 80, 60);
+const wallTex2 = makeWallTex(64, 100, 60, 50);
+
+// Floor/ceiling colors
+const CEIL_TOP = '#1a1a2e', CEIL_BOT = '#16213e';
+const FLOOR_TOP = '#3d2b1f', FLOOR_BOT = '#2d1f15';
+
+// ─── RAYCASTER ───────────────────────────────────────────────────────────────
+const FOV = Math.PI / 3;
+const RAYS = 320; // half resolution, scaled to W
+const HALF_FOV = FOV / 2;
+const zBuffer = new Float32Array(RAYS);
+
+function cast(px, py, angle) {
+  const dx = Math.cos(angle), dy = Math.sin(angle);
+  let mx = Math.floor(px), my = Math.floor(py);
+  const sx = dx > 0 ? 1 : -1, sy = dy > 0 ? 1 : -1;
+  let tdx = dx === 0 ? 1e30 : Math.abs(1/dx);
+  let tdy = dy === 0 ? 1e30 : Math.abs(1/dy);
+  let sx_ = dx < 0 ? (px - mx) * tdx : (mx + 1 - px) * tdx;
+  let sy_ = dy < 0 ? (py - my) * tdy : (my + 1 - py) * tdy;
+  let hit = 0, side = 0;
+  let dist = 0;
+  while (!hit) {
+    if (sx_ < sy_) { sx_ += tdx; mx += sx; side = 0; }
+    else           { sy_ += tdy; my += sy; side = 1; }
+    if (mx < 0 || my < 0 || mx >= COLS || my >= ROWS) { hit=1; dist=20; break; }
+    if (MAP[my][mx] === 1) { hit=1; }
+  }
+  if (side === 0) dist = (mx - px + (1 - sx) / 2) / dx;
+  else            dist = (my - py + (1 - sy) / 2) / dy;
+  const wallX = side === 0 ? py + dist * dy : px + dist * dx;
+  const tx = Math.floor((wallX - Math.floor(wallX)) * 64);
+  return { dist: Math.max(0.001, dist), side, tx };
+}
+
+function render() {
+  // ── ceiling/floor gradient ──
+  const cg = ctx.createLinearGradient(0,0,0,H/2);
+  cg.addColorStop(0, CEIL_TOP); cg.addColorStop(1, CEIL_BOT);
+  ctx.fillStyle = cg; ctx.fillRect(0,0,W,H/2);
+  const fg = ctx.createLinearGradient(0,H/2,0,H);
+  fg.addColorStop(0, FLOOR_TOP); fg.addColorStop(1, FLOOR_BOT);
+  ctx.fillStyle = fg; ctx.fillRect(0,H/2,W,H/2);
+
+  // ── walls ──
+  const colW = W / RAYS;
+  for (let i = 0; i < RAYS; i++) {
+    const rayAngle = player.angle - HALF_FOV + (i / RAYS) * FOV;
+    const { dist, side, tx } = cast(player.x, player.y, rayAngle);
+    const corrected = dist * Math.cos(rayAngle - player.angle);
+    zBuffer[i] = corrected;
+    const h = Math.min(H, Math.floor(H / corrected));
+    const top = Math.floor((H - h) / 2);
+    // Draw wall slice from texture
+    const shade = side === 1 ? 0.6 : 1.0;
+    const brightness = Math.max(0, Math.min(1, (1 - corrected / 12) * shade));
+    const tex = side === 0 ? wallTex : wallTex2;
+    ctx.globalAlpha = brightness;
+    ctx.drawImage(tex, tx, 0, 1, 64, i * colW, top, colW+1, h);
+    ctx.globalAlpha = 1;
+  }
+
+  // ── enemies (sprites) ──
+  // Sort by distance descending
+  const visEnemies = enemies
+    .filter(e => e.alive)
+    .map(e => {
+      const dx = e.x - player.x, dy = e.y - player.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const angle = Math.atan2(dy, dx) - player.angle;
+      return { e, dist, angle };
+    })
+    .sort((a, b) => b.dist - a.dist);
+
+  for (const { e, dist, angle } of visEnemies) {
+    let a = angle;
+    while (a > Math.PI) a -= 2*Math.PI;
+    while (a < -Math.PI) a += 2*Math.PI;
+    if (Math.abs(a) > HALF_FOV + 0.2) continue;
+
+    const screenX = (0.5 + a / FOV) * W;
+    const corrected = Math.max(0.1, dist * Math.cos(a));
+    const spriteH = Math.min(H*2, Math.floor(H / corrected));
+    const spriteW = spriteH;
+    const sx = screenX - spriteW/2;
+    const sy = (H - spriteH) / 2;
+    // Check occlusion by zBuffer
+    const col0 = Math.floor((screenX - spriteW/2) / (W/RAYS));
+    const col1 = Math.floor((screenX + spriteW/2) / (W/RAYS));
+    let visible = false;
+    for (let c = Math.max(0,col0); c <= Math.min(RAYS-1,col1); c++) {
+      if (zBuffer[c] > corrected) { visible = true; break; }
+    }
+    if (!visible) continue;
+
+    // Draw enemy
+    const br = Math.max(0.1, Math.min(1, (1 - corrected/10)));
+    ctx.globalAlpha = br;
+    // Body
+    const fr = Math.floor(e.frame) % 2;
+    ctx.fillStyle = e.health < 20 ? '#c00' : '#8b0000';
+    ctx.fillRect(sx + spriteW*0.25, sy + spriteH*0.1, spriteW*0.5, spriteH*0.55);
+    // Head
+    ctx.fillStyle = '#c8966e';
+    ctx.beginPath();
+    ctx.arc(screenX, sy + spriteH*0.12, spriteH*0.1, 0, Math.PI*2);
+    ctx.fill();
+    // Eyes
+    ctx.fillStyle = e.state==='attack'?'#f00':'#ff0';
+    ctx.fillRect(screenX - spriteH*0.07 + fr*2, sy+spriteH*0.08, spriteH*0.04, spriteH*0.04);
+    ctx.fillRect(screenX + spriteH*0.03 + fr*2, sy+spriteH*0.08, spriteH*0.04, spriteH*0.04);
+    // Legs (animated)
+    ctx.fillStyle = '#333';
+    ctx.fillRect(sx+spriteW*0.3, sy+spriteH*0.65, spriteW*0.15, spriteH*0.25+(fr?-4:4));
+    ctx.fillRect(sx+spriteW*0.55, sy+spriteH*0.65, spriteW*0.15, spriteH*0.25+(fr?4:-4));
+    // Arms
+    ctx.fillStyle = '#8b0000';
+    ctx.fillRect(sx+spriteW*0.1, sy+spriteH*0.2, spriteW*0.15, spriteH*0.3);
+    ctx.fillRect(sx+spriteW*0.75, sy+spriteH*0.2, spriteW*0.15, spriteH*0.3);
+    // Health bar
+    if (corrected < 5) {
+      ctx.globalAlpha = br;
+      ctx.fillStyle = '#300';
+      ctx.fillRect(sx, sy - 6, spriteW, 4);
+      ctx.fillStyle = '#0f0';
+      ctx.fillRect(sx, sy - 6, spriteW * (e.health/40), 4);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // ── bullets (player shots visible as impacts) ──
+  for (const b of bullets) {
+    const dx = b.x - player.x, dy = b.y - player.y;
+    const dist = Math.sqrt(dx*dx+dy*dy);
+    if (dist < 0.3) continue;
+    const angle = Math.atan2(dy, dx) - player.angle;
+    let a = angle;
+    while (a > Math.PI) a -= 2*Math.PI;
+    while (a < -Math.PI) a += 2*Math.PI;
+    if (Math.abs(a) > HALF_FOV) continue;
+    const screenX = (0.5 + a/FOV)*W;
+    const corrected = Math.max(0.1, dist*Math.cos(a));
+    const h = Math.floor(H/corrected*0.1);
+    const top = H/2 - h/2;
+    ctx.fillStyle = '#ff0';
+    ctx.globalAlpha = 0.9;
+    ctx.beginPath();
+    ctx.arc(screenX, top+h/2, Math.max(2,h/2), 0, Math.PI*2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // ── effects ──
+  for (const ef of effects) {
+    if (ef.type === 'blood') {
+      ctx.globalAlpha = ef.life/20;
+      ctx.fillStyle = '#f00';
+      for (const p of ef.particles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // ── gun ──
+  drawGun();
+
+  // ── hit flash ──
+  if (hitFlash > 0) {
+    ctx.fillStyle = `rgba(200,0,0,${hitFlash/20*0.5})`;
+    ctx.fillRect(0, 0, W, H);
+    hitFlash--;
+  }
+
+  // ── muzzle flash ──
+  if (muzzleFlash > 0) {
+    ctx.fillStyle = `rgba(255,200,50,${muzzleFlash/6*0.3})`;
+    ctx.fillRect(0, 0, W, H);
+    muzzleFlash--;
+  }
+}
+
+// ─── GUN ─────────────────────────────────────────────────────────────────────
+function drawGun() {
+  const gw = 160, gh = 160;
+  const gx = W/2 - gw/2;
+  const gy = H - gh + 10;
+  const bob = Math.sin(Date.now()/200) * (isMoving() ? 6 : 0);
+
+  ctx.save();
+  ctx.translate(gx, gy + bob);
+
+  if (gunFrame === 0) {
+    // Idle gun
+    ctx.fillStyle = '#666';
+    ctx.fillRect(60, 60, 40, 60); // barrel
+    ctx.fillRect(40, 100, 80, 40); // body
+    ctx.fillStyle = '#444';
+    ctx.fillRect(50, 110, 60, 50); // handle
+    ctx.fillStyle = '#888';
+    ctx.fillRect(62, 55, 16, 10); // barrel tip
+  } else if (gunFrame === 1) {
+    // Shoot frame 1
+    ctx.fillStyle = '#666';
+    ctx.fillRect(60, 50, 40, 70);
+    ctx.fillRect(40, 100, 80, 40);
+    ctx.fillStyle = '#444';
+    ctx.fillRect(50, 110, 60, 50);
+    // muzzle flash
+    ctx.fillStyle = '#ff0';
+    ctx.beginPath();
+    ctx.arc(80, 45, 20, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(80, 45, 10, 0, Math.PI*2);
+    ctx.fill();
+  } else {
+    // Shoot frame 2
+    ctx.fillStyle = '#666';
+    ctx.fillRect(60, 55, 40, 65);
+    ctx.fillRect(40, 100, 80, 40);
+    ctx.fillStyle = '#444';
+    ctx.fillRect(50, 110, 60, 50);
+    ctx.fillStyle = '#f80';
+    ctx.beginPath();
+    ctx.arc(80, 48, 14, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function isMoving() {
+  return keys['w'] || keys['s'] || keys['ArrowUp'] || keys['ArrowDown'];
+}
+
+// ─── MINIMAP ──────────────────────────────────────────────────────────────────
+function drawMinimap() {
+  mctx.clearRect(0,0,MW,MH);
+  const tileW = MW/COLS, tileH = MH/ROWS;
+  for (let y=0;y<ROWS;y++) {
+    for (let x=0;x<COLS;x++) {
+      mctx.fillStyle = MAP[y][x]===1 ? '#555' : '#111';
+      mctx.fillRect(x*tileW, y*tileH, tileW-0.5, tileH-0.5);
+    }
+  }
+  // Enemies
+  for (const e of enemies) {
+    if (!e.alive) continue;
+    mctx.fillStyle = '#f00';
+    mctx.fillRect(e.x*tileW-2, e.y*tileH-2, 4, 4);
+  }
+  // Player
+  mctx.fillStyle = '#0f0';
+  mctx.beginPath();
+  mctx.arc(player.x*tileW, player.y*tileH, 4, 0, Math.PI*2);
+  mctx.fill();
+  // Direction
+  mctx.strokeStyle = '#0f0';
+  mctx.lineWidth = 1.5;
+  mctx.beginPath();
+  mctx.moveTo(player.x*tileW, player.y*tileH);
+  mctx.lineTo((player.x+Math.cos(player.angle)*0.8)*tileW, (player.y+Math.sin(player.angle)*0.8)*tileH);
+  mctx.stroke();
+}
+
+// ─── SHOOT ────────────────────────────────────────────────────────────────────
+function shoot() {
+  if (shootCooldown > 0 || player.ammo <= 0) return;
+  player.ammo--;
+  shootCooldown = 18;
+  gunFrame = 1;
+  gunTimer = 6;
+  muzzleFlash = 6;
+
+  // Raycast for hit
+  const { dist, side } = cast(player.x, player.y, player.angle);
+  // Check enemy hits along ray
+  let hit = null, bestDist = dist;
+  for (const e of enemies) {
+    if (!e.alive) continue;
+    const dx = e.x - player.x, dy = e.y - player.y;
+    const d = Math.sqrt(dx*dx+dy*dy);
+    if (d >= bestDist) continue;
+    // Check if enemy is roughly along the ray angle
+    const ea = Math.atan2(dy, dx);
+    let da = ea - player.angle;
+    while (da > Math.PI) da -= 2*Math.PI;
+    while (da < -Math.PI) da += 2*Math.PI;
+    const aimTol = Math.atan2(0.4, d); // tolerance based on distance
+    if (Math.abs(da) < aimTol) {
+      bestDist = d;
+      hit = e;
+    }
+  }
+  if (hit) {
+    const dmg = 15 + Math.floor(Math.random()*10);
+    hit.health -= dmg;
+    hit.state = 'chase';
+    hit.alertTimer = 200;
+    // Blood effect
+    const dx = hit.x - player.x, dy = hit.y - player.y;
+    const ea = Math.atan2(dy, dx);
+    const screenX = (0.5 + (ea - player.angle) / FOV) * W;
+    const corrected = Math.max(0.1, bestDist * Math.cos(ea - player.angle));
+    const spriteH = Math.floor(H / corrected);
+    const sy = (H - spriteH) / 2;
+    effects.push({
+      type: 'blood', life: 20,
+      particles: Array.from({length:8},()=>({
+        x: screenX + (Math.random()-0.5)*spriteH*0.5,
+        y: sy + spriteH*0.3 + Math.random()*spriteH*0.4,
+        r: 2+Math.random()*4
+      }))
+    });
+    if (hit.health <= 0) {
+      hit.alive = false;
+      player.kills++;
+      player.score += 100;
+      updateHUD();
+    }
+    document.getElementById('face').textContent = '😈';
+    setTimeout(()=>document.getElementById('face').textContent=player.health>50?'😐':'😟', 300);
+  }
+  updateHUD();
+}
+
+// ─── ENEMY AI ─────────────────────────────────────────────────────────────────
+function updateEnemies(dt) {
+  for (const e of enemies) {
+    if (!e.alive) continue;
+    const dx = player.x - e.x, dy = player.y - e.y;
+    const dist = Math.sqrt(dx*dx+dy*dy);
+
+    // Animate
+    e.frameTimer += dt;
+    if (e.frameTimer > 300) { e.frame = (e.frame+1)%2; e.frameTimer=0; }
+
+    // State machine
+    if (e.alertTimer > 0) e.alertTimer -= dt;
+    if (dist < 8 && !isWall(player.x, player.y)) {
+      e.state = 'chase';
+      e.alertTimer = 300;
+    }
+    if (e.alertTimer <= 0) e.state = 'patrol';
+
+    if (e.state === 'chase') {
+      const toA = Math.atan2(dy, dx);
+      e.angle = toA;
+      if (dist > 1.2) {
+        const nx = e.x + Math.cos(e.angle)*e.speed*dt/16;
+        const ny = e.y + Math.sin(e.angle)*e.speed*dt/16;
+        if (!isWall(nx, e.y)) e.x = nx;
+        if (!isWall(e.x, ny)) e.y = ny;
+      }
+      // Attack
+      e.attackTimer += dt;
+      if (dist < 1.5 && e.attackTimer > 800) {
+        e.attackTimer = 0;
+        e.state = 'attack';
+        const dmg = 5 + Math.floor(Math.random()*8);
+        player.health = Math.max(0, player.health - dmg);
+        hitFlash = 12;
+        document.getElementById('face').textContent = player.health > 50 ? '😬' : '😱';
+        setTimeout(()=>document.getElementById('face').textContent=player.health>50?'😐':'😟', 400);
+        updateHUD();
+        if (player.health <= 0) gameOver();
+      }
+      if (e.state === 'attack') setTimeout(()=>{ if(e.alive) e.state='chase'; }, 300);
+    } else {
+      // Patrol
+      e.patrolAngle += (Math.random()-0.5)*0.05;
+      const nx = e.x + Math.cos(e.patrolAngle)*e.speed*dt/32;
+      const ny = e.y + Math.sin(e.patrolAngle)*e.speed*dt/32;
+      if (!isWall(nx, e.y)) e.x = nx; else e.patrolAngle += Math.PI/2;
+      if (!isWall(e.x, ny)) e.y = ny; else e.patrolAngle += Math.PI/2;
+    }
+  }
+}
+
+// ─── HUD UPDATE ──────────────────────────────────────────────────────────────
+function updateHUD() {
+  document.getElementById('health').textContent = player.health;
+  document.getElementById('ammo').textContent = player.ammo;
+  document.getElementById('score').textContent = player.score;
+  document.getElementById('kills').textContent = player.kills;
+  const h = document.getElementById('health');
+  h.style.color = player.health > 50 ? '#ff0' : player.health > 20 ? '#f80' : '#f00';
+  const a = document.getElementById('ammo');
+  a.style.color = player.ammo > 10 ? '#ff0' : '#f00';
+}
+
+// ─── GAME OVER / WIN ─────────────────────────────────────────────────────────
+let gameState = 'playing';
+function gameOver() {
+  gameState = 'over';
+  const msg = document.getElementById('msg');
+  msg.innerHTML = 'VOCÊ MORREU!<br><span style="font-size:16px;color:#ff0">Pressione R para reiniciar</span>';
+  msg.style.display = 'block';
+  document.getElementById('face').textContent = '💀';
+}
+function checkWin() {
+  if (enemies.every(e => !e.alive)) {
+    gameState = 'win';
+    const msg = document.getElementById('msg');
+    msg.innerHTML = 'NÍVEL COMPLETO!<br><span style="font-size:16px;color:#ff0">Pontos: '+player.score+'</span>';
+    msg.style.display = 'block';
+    document.getElementById('face').textContent = '😎';
+  }
+}
+
+// ─── INPUT ────────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  keys[e.key] = true;
+  if (e.key === 'r' || e.key === 'R') location.reload();
+  if (e.key === ' ') { e.preventDefault(); shoot(); }
+  if (e.key === 'Escape') {
+    if (document.pointerLockElement) document.exitPointerLock();
+    else canvas.requestPointerLock();
+  }
+});
+document.addEventListener('keyup', e => keys[e.key] = false);
+canvas.addEventListener('click', () => {
+  canvas.requestPointerLock();
+  if (gameState === 'playing') shoot();
+});
+document.addEventListener('mousemove', e => {
+  if (document.pointerLockElement === canvas) {
+    player.angle += e.movementX * 0.003;
+  }
+});
+
+// ─── AMMO PICKUP (respawn ammo periodically) ─────────────────────────────────
+let ammoTimer = 0;
+function checkAmmoRespawn(dt) {
+  ammoTimer += dt;
+  if (ammoTimer > 15000 && player.ammo < 30) {
+    player.ammo = Math.min(50, player.ammo + 10);
+    ammoTimer = 0;
+    updateHUD();
+  }
+}
+
+// ─── GAME LOOP ────────────────────────────────────────────────────────────────
+let last = 0;
+function loop(ts) {
+  const dt = ts - last; last = ts;
+
+  if (gameState === 'playing') {
+    // Movement
+    const spd = player.speed;
+    const cos = Math.cos(player.angle), sin = Math.sin(player.angle);
+    if (keys['w'] || keys['ArrowUp']) {
+      const nx = player.x + cos*spd, ny = player.y + sin*spd;
+      if (!isWall(nx+cos*0.2, player.y)) player.x = nx;
+      if (!isWall(player.x, ny+sin*0.2)) player.y = ny;
+    }
+    if (keys['s'] || keys['ArrowDown']) {
+      const nx = player.x - cos*spd, ny = player.y - sin*spd;
+      if (!isWall(nx-cos*0.2, player.y)) player.x = nx;
+      if (!isWall(player.x, ny-sin*0.2)) player.y = ny;
+    }
+    if (keys['a'] || keys['ArrowLeft'])  player.angle -= player.rotSpeed;
+    if (keys['d'] || keys['ArrowRight']) player.angle += player.rotSpeed;
+    // Strafe
+    if (keys['q']) {
+      const nx = player.x + sin*spd, ny = player.y - cos*spd;
+      if (!isWall(nx, player.y)) player.x = nx;
+      if (!isWall(player.x, ny)) player.y = ny;
+    }
+    if (keys['e']) {
+      const nx = player.x - sin*spd, ny = player.y + cos*spd;
+      if (!isWall(nx, player.y)) player.x = nx;
+      if (!isWall(player.x, ny)) player.y = ny;
+    }
+
+    // Shoot cooldown
+    if (shootCooldown > 0) shootCooldown--;
+    // Gun animation
+    if (gunTimer > 0) { gunTimer--; if(gunTimer===0) gunFrame=0; }
+    else if (gunFrame === 1) { gunFrame = 2; gunTimer = 4; }
+
+    // Effects cleanup
+    effects = effects.filter(ef => { ef.life--; return ef.life > 0; });
+
+    updateEnemies(dt);
+    checkAmmoRespawn(dt);
+    checkWin();
+  }
+
+  render();
+  drawMinimap();
+  requestAnimationFrame(loop);
+}
+
+updateHUD();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

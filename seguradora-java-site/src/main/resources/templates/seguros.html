@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Vida Seguros | Portfólio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header class="subhero">
+    <nav class="navbar">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-icon"><i class="bi bi-shield-fill-check"></i></span>
+            Nova Vida Seguros
+        </a>
+        <div class="nav-links dark-links">
+            <a th:href="@{/}" th:classappend="${currentPage == 'home'} ? ' active' : ''">Início</a>
+            <a th:href="@{/seguros}" th:classappend="${currentPage == 'seguros'} ? ' active' : ''">Seguros</a>
+            <a th:href="@{/cotacao}" th:classappend="${currentPage == 'cotacao'} ? ' active' : ''">Cotação</a>
+            <a th:href="@{/contato}" th:classappend="${currentPage == 'contato'} ? ' active' : ''">Contato</a>
+        </div>
+    </nav>
+    <div class="page-hero-copy">
+        <span class="section-tag"><i class="bi bi-grid-3x3-gap"></i> Portfólio completo</span>
+        <h1>Planos pensados para proteger pessoas, bens e operações.</h1>
+        <p>Conheça os principais produtos da Nova Vida e siga para uma simulação em poucos cliques.</p>
+    </div>
+</header>
+
+<main>
+    <section class="section">
+        <div class="plans-grid">
+            <article class="plan-card" th:each="plano, iter : ${planos}" th:classappend="${iter.index == 0} ? ' featured' : ''">
+                <span class="plan-badge" th:if="${iter.index == 0}"><i class="bi bi-star-fill"></i> mais vendido</span>
+                <div class="plan-header">
+                    <h3 th:text="${plano[0]}"></h3>
+                    <div class="plan-price">
+                        <strong th:text="${plano[2]}"></strong>
+                    </div>
+                </div>
+                <p th:text="${plano[1]}"></p>
+                <ul class="plan-features">
+                    <li><i class="bi bi-check-circle-fill"></i> Rede credenciada nacional</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Atendimento 24h para sinistros</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Emissão digital da apólice</li>
+                </ul>
+                <a class="primary-button dark" th:href="@{/cotacao(tipo=${plano[0]})}"><i class="bi bi-calculator"></i> Simular plano</a>
+            </article>
+        </div>
+    </section>
+
+    <section class="section accent">
+        <div class="section-header">
+            <span class="section-tag"><i class="bi bi-trophy"></i> Benefícios</span>
+            <h2>Por que nossos clientes renovam com a Nova Vida</h2>
+        </div>
+        <div class="benefits">
+            <div class="benefit-item" th:each="beneficio : ${beneficios}">
+                <div class="benefit-icon"><i class="bi bi-check-lg"></i></div>
+                <p th:text="${beneficio}"></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section compact">
+        <div class="cta-highlight">
+            <h2>Não encontrou o seguro ideal?</h2>
+            <p>Fale com um consultor e receba uma proposta personalizada para a necessidade do seu cliente.</p>
+            <div class="cta-actions">
+                <a class="primary-button" th:href="@{/contato}"><i class="bi bi-headset"></i> Falar com especialista</a>
+                <a class="secondary-button light" th:href="@{/cotacao}"><i class="bi bi-calculator"></i> Simular cotação</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/footer :: site-footer}"></footer>
+</body>
+</html>

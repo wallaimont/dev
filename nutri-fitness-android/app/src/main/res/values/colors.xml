@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Cores primárias -->
+    <color name="primary">#FF4CAF50</color>
+    <color name="primary_dark">#FF388E3C</color>
+    <color name="primary_light">#FFC8E6C9</color>
+    <color name="accent">#FFFF9800</color>
+
+    <!-- Background -->
+    <color name="background">#FFF5F5F5</color>
+    <color name="card_bg">#FFFFFFFF</color>
+    <color name="selected_food_bg">#FFE8F5E9</color>
+    <color name="progress_bg">#FFE0E0E0</color>
+
+    <!-- Texto -->
+    <color name="text_primary">#FF212121</color>
+    <color name="text_secondary">#FF757575</color>
+
+    <!-- Macronutrientes -->
+    <color name="protein_color">#FFE53935</color>
+    <color name="carb_color">#FF1E88E5</color>
+    <color name="fat_color">#FFFDD835</color>
+    <color name="fiber_color">#FF8D6E63</color>
+
+    <!-- Água -->
+    <color name="water_color">#FF29B6F6</color>
+
+    <!-- Tipos de refeição -->
+    <color name="breakfast_color">#FFFFB74D</color>
+    <color name="lunch_color">#FF66BB6A</color>
+    <color name="snack_color">#FFBA68C8</color>
+    <color name="preworkout_color">#FFEF5350</color>
+    <color name="postworkout_color">#FF42A5F5</color>
+    <color name="dinner_color">#FF78909C</color>
+</resources>

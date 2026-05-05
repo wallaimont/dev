@@ -1,0 +1,42 @@
+{
+  "name": "amazon-angular",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "run:dev": "npm run dev",
+    "run:prod": "npm run build && npm run serve:ssr:amazon-angular",
+    "dev": "concurrently -k -n WEB,API -c cyan,green \"npm run dev:web\" \"npm run dev:api\"",
+    "dev:web": "node scripts/dev-web.cjs",
+    "dev:api": "node --watch api/server.cjs",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "serve:ssr:amazon-angular": "node dist/amazon-angular/server/server.mjs"
+  },
+  "private": true,
+  "packageManager": "npm@11.11.1",
+  "dependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/compiler": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/platform-browser": "^21.2.0",
+    "@angular/platform-server": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "@angular/ssr": "^21.2.9",
+    "express": "^5.1.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.2.9",
+    "@angular/cli": "^21.2.9",
+    "@angular/compiler-cli": "^21.2.0",
+    "@types/express": "^5.0.1",
+    "@types/node": "^20.17.19",
+    "concurrently": "^9.2.1",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.2"
+  }
+}

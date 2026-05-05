@@ -1,0 +1,78 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "percentunit"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
+      "id": 1,
+      "targets": [
+        {"expr": "sum(rate(orbyt_fraud_analyses_total{decision=\"REJECTED\"}[5m])) / clamp_min(sum(rate(orbyt_fraud_analyses_total[5m])), 0.0001)", "legendFormat": "reject-rate", "refId": "A"}
+      ],
+      "title": "Taxa de Rejeição Antifraude",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0},
+      "id": 2,
+      "targets": [
+        {"expr": "sum(rate(orbyt_fraud_risk_score_sum[5m])) / clamp_min(sum(rate(orbyt_fraud_risk_score_count[5m])), 1)", "legendFormat": "score-medio", "refId": "A"}
+      ],
+      "title": "Score Médio de Risco",
+      "type": "gauge"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "ops"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0},
+      "id": 3,
+      "targets": [
+        {"expr": "sum(rate(orbyt_fraud_blacklist_hits_total[5m]))", "legendFormat": "hits/s", "refId": "A"}
+      ],
+      "title": "Hits de Blacklist por Segundo",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "id": 4,
+      "targets": [
+        {"expr": "sum by (decision) (increase(orbyt_fraud_analyses_total[1h]))", "legendFormat": "{{decision}}", "refId": "A"}
+      ],
+      "title": "Decisões Antifraude (1h)",
+      "type": "barchart"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "id": 5,
+      "targets": [
+        {"expr": "sum by (type) (increase(orbyt_fraud_blacklist_hits_total[1h]))", "legendFormat": "{{type}}", "refId": "A"}
+      ],
+      "title": "Hits de Blacklist por Tipo (1h)",
+      "type": "barchart"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["fraud", "orbyt"],
+  "templating": {"list": []},
+  "time": {"from": "now-6h", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Antifraud Control",
+  "uid": "orbyt-antifraud",
+  "version": 1,
+  "weekStart": ""
+}

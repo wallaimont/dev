@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Corretoras')}"></head>
+<body>
+<div class="main-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div class="main-content">
+        <div th:replace="~{fragments/layout :: topbar}"></div>
+        <div class="content-area">
+            <div class="page-header">
+                <div><h1 class="page-title">Corretoras</h1><p class="page-subtitle">Cadastro de corretoras parceiras</p></div>
+                <button class="btn btn-primary" onclick="novaCorretora()"><i class="bi bi-plus-lg me-1"></i>Nova Corretora</button>
+            </div>
+            <div class="table-container">
+                <div class="table-toolbar">
+                    <div class="table-filters">
+                        <input type="text" class="form-control" id="fNome" placeholder="Buscar por nome..." onkeyup="if(event.key==='Enter')loadCorretoras()">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadCorretoras()"><i class="bi bi-search me-1"></i>Buscar</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead><tr><th>Nome</th><th>CNPJ</th><th>Respons&#225;vel</th><th>E-mail</th><th>% Comiss&#227;o</th><th>Status</th><th width="100">A&#231;&#245;es</th></tr></thead>
+                        <tbody id="tblData"><tr><td colspan="7" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Carregando...</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="table-pagination" id="pagination"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: toasts}"></div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>
+async function loadCorretoras(page = 0) {
+    const params = new URLSearchParams({ page, size: 20 });
+    const nome = document.getElementById('fNome').value;
+    if (nome) params.append('nome', nome);
+    try {
+        const res = await API.get('/corretoras?' + params);
+        const data = res.data;
+        const tb = document.getElementById('tblData');
+        if (data.content.length === 0) {
+            tb.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>Nenhuma corretora encontrada</td></tr>';
+        } else {
+            tb.innerHTML = data.content.map(c => `<tr>
+                <td><strong>${c.nome}</strong></td>
+                <td><code>${c.cnpj || '-'}</code></td>
+                <td>${c.responsavel || '-'}</td>
+                <td>${c.email || '-'}</td>
+                <td>${c.percentualComissao ? c.percentualComissao + '%' : '-'}</td>
+                <td>${statusBadge(c.ativo ? 'ATIVO' : 'INATIVO')}</td>
+                <td>
+                    ${canEdit('corretoras') ? `<button class="btn btn-icon btn-outline-primary btn-sm me-1" onclick="editarCorretora(${c.id})" title="Editar"><i class="bi bi-pencil"></i></button>` : ''}
+                    ${canDelete('corretoras') ? `<button class="btn btn-icon btn-outline-danger btn-sm" onclick="inativarCorretora(${c.id})" title="Inativar"><i class="bi bi-trash"></i></button>` : ''}
+                </td>
+            </tr>`).join('');
+        }
+        document.getElementById('pagination').innerHTML = renderPagination(data, 'loadCorretoras');
+    } catch (err) { showToast(err.message, 'danger'); }
+}
+
+function formCorretora(c = {}) {
+    return `<form id="formCorretora"><div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Nome</label><input type="text" class="form-control" id="cNome" value="${c.nome || ''}" required></div>
+        <div class="col-md-6"><label class="form-label">CNPJ</label><input type="text" class="form-control" id="cCnpj" value="${c.cnpj || ''}" required></div>
+        <div class="col-md-4"><label class="form-label">Respons&#225;vel</label><input type="text" class="form-control" id="cResponsavel" value="${c.responsavel || ''}"></div>
+        <div class="col-md-4"><label class="form-label">E-mail</label><input type="email" class="form-control" id="cEmail" value="${c.email || ''}"></div>
+        <div class="col-md-4"><label class="form-label">Telefone</label><input type="text" class="form-control" id="cTelefone" value="${c.telefone || ''}"></div>
+        <div class="col-md-4"><label class="form-label">% Comiss&#227;o</label><input type="number" step="0.01" class="form-control" id="cComissao" value="${c.percentualComissao || ''}"></div>
+        <div class="col-md-8"><label class="form-label">Endere&#231;o</label><input type="text" class="form-control" id="cEndereco" value="${c.endereco || ''}"></div>
+        <div class="col-12"><label class="form-label">Observa&#231;&#245;es</label><textarea class="form-control" id="cObs" rows="2">${c.observacoes || ''}</textarea></div>
+    </div></form>`;
+}
+
+function getCorretoraData() {
+    return {
+        nome: document.getElementById('cNome').value,
+        cnpj: document.getElementById('cCnpj').value,
+        responsavel: document.getElementById('cResponsavel').value,
+        email: document.getElementById('cEmail').value,
+        telefone: document.getElementById('cTelefone').value,
+        percentualComissao: document.getElementById('cComissao').value,
+        endereco: document.getElementById('cEndereco').value,
+        observacoes: document.getElementById('cObs').value
+    };
+}
+
+function novaCorretora() {
+    showModal('Nova Corretora', formCorretora(), async () => {
+        await API.post('/corretoras', getCorretoraData());
+        showToast('Corretora cadastrada com sucesso');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadCorretoras();
+    });
+}
+
+async function editarCorretora(id) {
+    const res = await API.get('/corretoras/' + id);
+    showModal('Editar Corretora', formCorretora(res.data), async () => {
+        await API.put('/corretoras/' + id, getCorretoraData());
+        showToast('Corretora atualizada');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadCorretoras();
+    });
+}
+
+async function inativarCorretora(id) {
+    if (!confirm('Deseja inativar esta corretora?')) return;
+    await API.del('/corretoras/' + id);
+    showToast('Corretora inativada');
+    loadCorretoras();
+}
+
+document.addEventListener('DOMContentLoaded', loadCorretoras);
+</script>
+</body>
+</html>

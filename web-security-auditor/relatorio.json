@@ -1,0 +1,160 @@
+[
+  {
+    "target": "https://example.com",
+    "normalizedUrl": "https://example.com",
+    "finalUrl": "https://example.com/",
+    "status": 200,
+    "startedAt": "2026-05-04T23:41:22.278Z",
+    "finishedAt": "2026-05-04T23:41:22.608Z",
+    "riskScore": 13,
+    "summary": {
+      "totalChecks": 14,
+      "passed": 5,
+      "failed": 9,
+      "high": 1,
+      "medium": 3,
+      "low": 4
+    },
+    "tls": {
+      "ok": true,
+      "subject": {
+        "CN": "example.com"
+      },
+      "issuer": {
+        "C": "US",
+        "O": "CLOUDFLARE, INC.",
+        "CN": "Cloudflare TLS Issuing ECC CA 1"
+      },
+      "expiresAt": "2026-07-01T21:24:46.000Z",
+      "daysLeft": 58
+    },
+    "checks": [
+      {
+        "id": "https",
+        "title": "Uso de HTTPS",
+        "passed": true,
+        "severity": "high",
+        "details": "Conexao HTTPS ativa em https://example.com/",
+        "recommendation": "Forcar HTTPS com redirecionamento 301 e HSTS",
+        "score": 0
+      },
+      {
+        "id": "hsts",
+        "title": "HSTS configurado",
+        "passed": false,
+        "severity": "high",
+        "details": "Header HSTS ausente",
+        "recommendation": "Adicionar Strict-Transport-Security com max-age adequado",
+        "score": 3
+      },
+      {
+        "id": "csp",
+        "title": "Content Security Policy",
+        "passed": false,
+        "severity": "medium",
+        "details": "CSP ausente",
+        "recommendation": "Definir CSP restritiva para reduzir XSS",
+        "score": 2
+      },
+      {
+        "id": "clickjacking",
+        "title": "Protecao contra clickjacking",
+        "passed": false,
+        "severity": "medium",
+        "details": "Sem X-Frame-Options/frame-ancestors",
+        "recommendation": "Configurar X-Frame-Options DENY/SAMEORIGIN ou frame-ancestors no CSP",
+        "score": 2
+      },
+      {
+        "id": "x-content-type-options",
+        "title": "Protecao MIME sniffing",
+        "passed": false,
+        "severity": "medium",
+        "details": "Header X-Content-Type-Options ausente",
+        "recommendation": "Definir X-Content-Type-Options: nosniff",
+        "score": 2
+      },
+      {
+        "id": "referrer-policy",
+        "title": "Referrer-Policy",
+        "passed": false,
+        "severity": "low",
+        "details": "Referrer-Policy ausente",
+        "recommendation": "Definir Referrer-Policy para limitar vazamento de URL",
+        "score": 1
+      },
+      {
+        "id": "permissions-policy",
+        "title": "Permissions-Policy",
+        "passed": false,
+        "severity": "low",
+        "details": "Permissions-Policy ausente",
+        "recommendation": "Definir Permissions-Policy para restringir recursos do navegador",
+        "score": 1
+      },
+      {
+        "id": "cors",
+        "title": "Configuracao CORS",
+        "passed": true,
+        "severity": "medium",
+        "details": "Sem cabecalhos CORS relevantes",
+        "recommendation": "Evitar wildcard em producao e validar origens permitidas",
+        "score": 0
+      },
+      {
+        "id": "server-banner",
+        "title": "Exposicao de banner do servidor",
+        "passed": false,
+        "severity": "low",
+        "details": "Server: cloudflare",
+        "recommendation": "Ocultar ou reduzir detalhes de versao do servidor",
+        "score": 1
+      },
+      {
+        "id": "x-powered-by",
+        "title": "Exposicao de tecnologia",
+        "passed": true,
+        "severity": "low",
+        "details": "Sem exposicao X-Powered-By",
+        "recommendation": "Remover header X-Powered-By",
+        "score": 0
+      },
+      {
+        "id": "cookies",
+        "title": "Flags de cookies de sessao",
+        "passed": true,
+        "severity": "low",
+        "details": "Nenhum cookie Set-Cookie detectado na resposta",
+        "recommendation": "Aplicar Secure, HttpOnly e SameSite quando houver cookies",
+        "score": 0
+      },
+      {
+        "id": "security-txt",
+        "title": "security.txt publicado",
+        "passed": false,
+        "severity": "low",
+        "details": "Arquivo security.txt nao encontrado",
+        "recommendation": "Publicar /.well-known/security.txt com canal de contato de seguranca",
+        "score": 1
+      },
+      {
+        "id": "robots",
+        "title": "robots.txt acessivel",
+        "passed": false,
+        "severity": "info",
+        "details": "robots.txt nao encontrado ou inacessivel",
+        "recommendation": "Publicar robots.txt para melhorar higiene operacional",
+        "score": 0
+      },
+      {
+        "id": "tls-cert-expiry",
+        "title": "Validade do certificado TLS",
+        "passed": true,
+        "severity": "high",
+        "details": "Expira em 58 dia(s)",
+        "recommendation": "Renovar certificado antes de 14 dias para evitar indisponibilidade",
+        "score": 0
+      }
+    ]
+  }
+]

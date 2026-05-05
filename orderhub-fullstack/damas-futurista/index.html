@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damas Futurista</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-container">
+        <header class="header">
+            <h1>NEON DAMAS</h1>
+            <div class="status">
+                <div class="player-turn cyan-turn active">
+                    <span class="avatar cyan"></span> CYBER
+                </div>
+                <div class="player-turn magenta-turn">
+                    <span class="avatar magenta"></span> NEON
+                </div>
+            </div>
+            <div class="score">
+                <span id="score1">12</span> - <span id="score2">12</span>
+            </div>
+        </header>
+        
+        <div class="board-container">
+            <div id="board" class="board"></div>
+        </div>
+        
+        <div id="game-over" class="modal hidden">
+            <div class="modal-content">
+                <h2 id="winner-text">CYBER VENCEU!</h2>
+                <button id="restart-btn" class="glow-on-hover">Nova Partida</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="controls-info">
+        <p><strong>REGRAS:</strong> Captura obrigatória. Clique na sua peça neon e depois no espaço vazio. O jogo possui efeitos de som!</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

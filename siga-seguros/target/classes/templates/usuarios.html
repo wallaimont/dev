@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Usu\u00e1rios')}"></head>
+<body>
+<div class="main-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div class="main-content">
+        <div th:replace="~{fragments/layout :: topbar}"></div>
+        <div class="content-area">
+            <div class="page-header">
+                <div><h1 class="page-title">Usu&#225;rios</h1><p class="page-subtitle">Gerenciamento de usu&#225;rios do sistema</p></div>
+                <button class="btn btn-primary" onclick="novoUsuario()"><i class="bi bi-plus-lg me-1"></i>Novo Usu&#225;rio</button>
+            </div>
+            <div class="table-container">
+                <div class="table-toolbar">
+                    <div class="table-filters">
+                        <input type="text" class="form-control" id="fNome" placeholder="Buscar por nome..." onkeyup="if(event.key==='Enter')loadUsuarios()">
+                        <select class="form-select" id="fPerfil" onchange="loadUsuarios()">
+                            <option value="">Todos os perfis</option>
+                            <option value="ADMIN">Administrador</option>
+                            <option value="GESTOR">Gestor</option>
+                            <option value="COMERCIAL">Comercial</option>
+                            <option value="OPERADOR">Operador</option>
+                            <option value="FINANCEIRO">Financeiro</option>
+                            <option value="AUDITOR">Auditor</option>
+                        </select>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadUsuarios()"><i class="bi bi-search me-1"></i>Buscar</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th width="160">A&#231;&#245;es</th></tr></thead>
+                        <tbody id="tblData"><tr><td colspan="5" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Carregando...</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="table-pagination" id="pagination"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: toasts}"></div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>
+async function loadUsuarios(page = 0) {
+    const params = new URLSearchParams({ page, size: 20 });
+    const nome = document.getElementById('fNome').value;
+    const perfil = document.getElementById('fPerfil').value;
+    if (nome) params.append('nome', nome);
+    if (perfil) params.append('perfil', perfil);
+    try {
+        const res = await API.get('/usuarios?' + params);
+        const data = res.data;
+        const tb = document.getElementById('tblData');
+        if (data.content.length === 0) {
+            tb.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>Nenhum usu\u00e1rio encontrado</td></tr>';
+        } else {
+            tb.innerHTML = data.content.map(u => `<tr>
+                <td><strong>${u.nome}</strong></td>
+                <td>${u.email}</td>
+                <td><span class="badge bg-primary-subtle text-primary">${u.perfil}</span></td>
+                <td>${statusBadge(u.ativo ? 'ATIVO' : 'INATIVO')}</td>
+                <td>
+                    ${canEdit('usuarios') ? `<button class="btn btn-icon btn-outline-primary btn-sm me-1" onclick="editarUsuario(${u.id})" title="Editar"><i class="bi bi-pencil"></i></button>` : ''}
+                    ${canEdit('usuarios') ? `<button class="btn btn-icon btn-outline-info btn-sm me-1" onclick="resetarSenha(${u.id})" title="Reset Senha"><i class="bi bi-key"></i></button>` : ''}
+                    ${canDelete('usuarios') ? (u.ativo
+                        ? `<button class="btn btn-icon btn-outline-danger btn-sm" onclick="inativarUsuario(${u.id})" title="Inativar"><i class="bi bi-person-x"></i></button>`
+                        : `<button class="btn btn-icon btn-outline-success btn-sm" onclick="ativarUsuario(${u.id})" title="Ativar"><i class="bi bi-person-check"></i></button>`
+                    ) : ''}
+                </td>
+            </tr>`).join('');
+        }
+        document.getElementById('pagination').innerHTML = renderPagination(data, 'loadUsuarios');
+    } catch (err) { showToast(err.message, 'danger'); }
+}
+
+function formUsuario(u = {}) {
+    return `<form id="formUsuario"><div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Nome</label><input type="text" class="form-control" id="uNome" value="${u.nome || ''}" required></div>
+        <div class="col-md-6"><label class="form-label">E-mail</label><input type="email" class="form-control" id="uEmail" value="${u.email || ''}" required></div>
+        <div class="col-md-6"><label class="form-label">Perfil</label><select class="form-select" id="uPerfil" required>
+            <option value="ADMIN" ${u.perfil === 'ADMIN' ? 'selected' : ''}>Administrador</option>
+            <option value="GESTOR" ${u.perfil === 'GESTOR' ? 'selected' : ''}>Gestor</option>
+            <option value="COMERCIAL" ${u.perfil === 'COMERCIAL' ? 'selected' : ''}>Comercial</option>
+            <option value="OPERADOR" ${u.perfil === 'OPERADOR' ? 'selected' : ''}>Operador</option>
+            <option value="FINANCEIRO" ${u.perfil === 'FINANCEIRO' ? 'selected' : ''}>Financeiro</option>
+            <option value="AUDITOR" ${u.perfil === 'AUDITOR' ? 'selected' : ''}>Auditor</option>
+        </select></div>
+        ${!u.id ? '<div class="col-md-6"><label class="form-label">Senha</label><input type="password" class="form-control" id="uSenha" required></div>' : '<div class="col-md-6"></div>'}
+    </div></form>`;
+}
+
+function getUsuarioData() {
+    const data = {
+        nome: document.getElementById('uNome').value,
+        email: document.getElementById('uEmail').value,
+        perfil: document.getElementById('uPerfil').value
+    };
+    const senhaEl = document.getElementById('uSenha');
+    if (senhaEl) data.senha = senhaEl.value;
+    return data;
+}
+
+function novoUsuario() {
+    showModal('Novo Usu\u00e1rio', formUsuario(), async () => {
+        await API.post('/usuarios', getUsuarioData());
+        showToast('Usu\u00e1rio criado com sucesso');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadUsuarios();
+    });
+}
+
+async function editarUsuario(id) {
+    const res = await API.get('/usuarios/' + id);
+    showModal('Editar Usu\u00e1rio', formUsuario(res.data), async () => {
+        await API.put('/usuarios/' + id, getUsuarioData());
+        showToast('Usu\u00e1rio atualizado');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadUsuarios();
+    });
+}
+
+async function inativarUsuario(id) {
+    if (!confirm('Deseja inativar este usu\u00e1rio?')) return;
+    await API.patch('/usuarios/' + id + '/inativar');
+    showToast('Usu\u00e1rio inativado');
+    loadUsuarios();
+}
+
+async function ativarUsuario(id) {
+    await API.patch('/usuarios/' + id + '/ativar');
+    showToast('Usu\u00e1rio ativado');
+    loadUsuarios();
+}
+
+async function resetarSenha(id) {
+    if (!confirm('Deseja resetar a senha deste usu\u00e1rio?')) return;
+    await API.patch('/usuarios/' + id + '/resetar-senha');
+    showToast('Senha resetada. Nova senha: mudar123');
+    loadUsuarios();
+}
+
+document.addEventListener('DOMContentLoaded', loadUsuarios);
+</script>
+</body>
+</html>

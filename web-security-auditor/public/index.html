@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Web Security Auditor — Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d2e;
+    --surface2: #22263a;
+    --border: #2d3155;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #6366f1;
+    --accent-hover: #818cf8;
+    --critico: #ef4444;
+    --alto: #f97316;
+    --medio: #eab308;
+    --baixo: #22c55e;
+    --info: #3b82f6;
+    --radius: 10px;
+  }
+
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; min-height: 100vh; }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  header .logo { font-size: 20px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
+  header .subtitle { color: var(--muted); font-size: 12px; }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
+
+  /* Input area */
+  .input-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .input-card label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+  .input-card textarea {
+    width: 100%;
+    height: 110px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 10px 12px;
+    font-size: 13px;
+    font-family: 'Cascadia Code', 'Courier New', monospace;
+    resize: vertical;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .input-card textarea:focus { border-color: var(--accent); }
+  .input-row { display: flex; gap: 10px; margin-top: 12px; align-items: center; flex-wrap: wrap; }
+  .btn {
+    padding: 9px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: opacity .2s, background .2s;
+  }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--accent); }
+  .timeout-wrap { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; margin-left: auto; }
+  .timeout-wrap input { width: 64px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); padding: 6px 8px; font-size: 12px; outline: none; }
+
+  /* Status */
+  #status { margin-bottom: 16px; font-size: 13px; color: var(--muted); min-height: 20px; }
+  .progress-bar { height: 3px; background: var(--border); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width .4s; }
+
+  /* Cards resumo */
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .summary-card .value { font-size: 28px; font-weight: 700; line-height: 1; }
+  .summary-card .label { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .4px; }
+  .card-critico .value { color: var(--critico); }
+  .card-alto    .value { color: var(--alto); }
+  .card-medio   .value { color: var(--medio); }
+  .card-baixo   .value { color: var(--baixo); }
+  .card-total   .value { color: var(--text); }
+  .card-avg     .value { color: var(--info); }
+
+  /* Toolbar tabela */
+  .table-toolbar { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+  .filter-select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+  }
+  .filter-select:focus { border-color: var(--accent); }
+  .search-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 13px;
+    width: 220px;
+    outline: none;
+  }
+  .search-input:focus { border-color: var(--accent); }
+
+  /* Tabela */
+  .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; background: var(--surface); }
+  th {
+    background: var(--surface2);
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--muted);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+  th:hover { color: var(--text); }
+  th .sort-icon { margin-left: 4px; opacity: .4; }
+  th.sorted .sort-icon { opacity: 1; }
+  td { padding: 10px 14px; border-top: 1px solid var(--border); vertical-align: middle; }
+  tr:hover td { background: var(--surface2); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+  .badge-Critico { background: rgba(239,68,68,.18); color: var(--critico); }
+  .badge-Alto    { background: rgba(249,115,22,.18); color: var(--alto); }
+  .badge-Medio   { background: rgba(234,179,8,.18);  color: var(--medio); }
+  .badge-Baixo   { background: rgba(34,197,94,.18);  color: var(--baixo); }
+  .badge-erro    { background: rgba(148,163,184,.15); color: var(--muted); }
+
+  .score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .score-bar { width: 60px; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 3px; }
+  .fill-Critico { background: var(--critico); }
+  .fill-Alto    { background: var(--alto); }
+  .fill-Medio   { background: var(--medio); }
+  .fill-Baixo   { background: var(--baixo); }
+
+  .icon-ok  { color: var(--baixo); }
+  .icon-err { color: var(--critico); }
+  .icon-med { color: var(--medio); }
+
+  .site-url { font-family: monospace; font-size: 12px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tls-days { font-size: 12px; }
+
+  /* Detalhe expansível */
+  tr.detail-row td { padding: 0; }
+  .detail-box {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 14px 20px;
+    display: none;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  tr.expanded + tr .detail-box { display: block; }
+  .detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; margin-top: 10px; }
+  .check-item { background: var(--surface); border-radius: 6px; padding: 10px 12px; border-left: 3px solid; }
+  .check-item.pass  { border-color: var(--baixo); }
+  .check-item.fail-high   { border-color: var(--critico); }
+  .check-item.fail-medium { border-color: var(--alto); }
+  .check-item.fail-low    { border-color: var(--medio); }
+  .check-title { font-weight: 600; }
+  .check-details { color: var(--muted); margin-top: 3px; }
+  .check-rec { color: var(--accent-hover); margin-top: 3px; }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty-state p { margin-top: 8px; font-size: 13px; }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 18px;
+    font-size: 13px; color: var(--text);
+    opacity: 0; transform: translateY(10px);
+    transition: opacity .25s, transform .25s;
+    pointer-events: none; z-index: 999;
+    max-width: 320px;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast.toast-err { border-color: var(--critico); color: var(--critico); }
+
+  .row-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 12px; padding: 2px 6px; border-radius: 4px; }
+  .row-btn:hover { background: var(--surface2); color: var(--text); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">&#x1F512; Web Security Auditor</div>
+    <div class="subtitle">Auditoria de headers, TLS e cookies — uso autorizado apenas</div>
+  </div>
+</header>
+
+<main>
+  <div class="input-card">
+    <label>URLs para auditar (uma por linha, máx. 50)</label>
+    <textarea id="urlInput" placeholder="https://exemplo.com&#10;https://api.exemplo.com&#10;https://staging.meuapp.com"></textarea>
+    <div class="input-row">
+      <button class="btn btn-primary" id="btnAudit">&#x25B6; Auditar</button>
+      <button class="btn btn-secondary" id="btnExportCsv" disabled>&#x2193; Exportar CSV</button>
+      <button class="btn btn-secondary" id="btnExportJson" disabled>&#x2193; Exportar JSON</button>
+      <button class="btn btn-secondary" id="btnClear" style="display:none">&#x2715; Limpar</button>
+      <div class="timeout-wrap">
+        Timeout por site
+        <input type="number" id="timeoutInput" value="12" min="5" max="60" />s
+      </div>
+    </div>
+  </div>
+
+  <div id="status"></div>
+
+  <div id="summary" style="display:none">
+    <div class="summary-grid">
+      <div class="summary-card card-total"><div class="value" id="sTotal">0</div><div class="label">Total</div></div>
+      <div class="summary-card card-avg">  <div class="value" id="sAvg">0</div>  <div class="label">Risco médio</div></div>
+      <div class="summary-card card-critico"><div class="value" id="sCritico">0</div><div class="label">Crítico</div></div>
+      <div class="summary-card card-alto">  <div class="value" id="sAlto">0</div>  <div class="label">Alto</div></div>
+      <div class="summary-card card-medio"> <div class="value" id="sMedio">0</div> <div class="label">Médio</div></div>
+      <div class="summary-card card-baixo"> <div class="value" id="sBaixo">0</div> <div class="label">Baixo</div></div>
+    </div>
+
+    <div class="table-toolbar">
+      <select class="filter-select" id="filterLevel">
+        <option value="">Todas as criticidades</option>
+        <option value="Critico">Crítico</option>
+        <option value="Alto">Alto</option>
+        <option value="Medio">Médio</option>
+        <option value="Baixo">Baixo</option>
+      </select>
+      <input class="search-input" id="searchInput" type="text" placeholder="Filtrar por URL..." />
+    </div>
+
+    <div class="table-wrap">
+      <table id="resultsTable">
+        <thead>
+          <tr>
+            <th data-col="target" class="sorted">URL <span class="sort-icon">&#x25B4;</span></th>
+            <th data-col="riskScore">Risco <span class="sort-icon">&#x25B4;</span></th>
+            <th data-col="criticidade">Criticidade <span class="sort-icon">&#x25B4;</span></th>
+            <th data-col="https">HTTPS <span class="sort-icon">&#x25B4;</span></th>
+            <th data-col="hsts">HSTS <span class="sort-icon">&#x25B4;</span></th>
+            <th data-col="csp">CSP <span class="sort-icon">&#x25B4;</span></th>
+            <th data-col="tls">TLS (dias) <span class="sort-icon">&#x25B4;</span></th>
+            <th data-col="cookies">Cookies <span class="sort-icon">&#x25B4;</span></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="emptyState" class="empty-state" style="display:none">
+    <div style="font-size:48px">&#x1F50D;</div>
+    <p>Nenhum resultado para os filtros atuais.</p>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+const API_BASE = window.location.origin;
+
+let reportData = null;
+let sortCol = "riskScore";
+let sortAsc = false;
+let expandedRow = null;
+
+// ---------- elementos ----------
+const urlInput     = document.getElementById("urlInput");
+const btnAudit     = document.getElementById("btnAudit");
+const btnExportCsv = document.getElementById("btnExportCsv");
+const btnExportJson= document.getElementById("btnExportJson");
+const btnClear     = document.getElementById("btnClear");
+const timeoutInput = document.getElementById("timeoutInput");
+const statusEl     = document.getElementById("status");
+const summaryEl    = document.getElementById("summary");
+const emptyStateEl = document.getElementById("emptyState");
+const filterLevel  = document.getElementById("filterLevel");
+const searchInput  = document.getElementById("searchInput");
+const tableBody    = document.getElementById("tableBody");
+
+// ---------- audit ----------
+
+btnAudit.addEventListener("click", async () => {
+  const raw = urlInput.value.trim();
+  if (!raw) { showToast("Informe ao menos uma URL.", true); return; }
+
+  const urls = raw.split("\n").map(u => u.trim()).filter(Boolean);
+  if (urls.length > 50) { showToast("Máximo 50 URLs por vez.", true); return; }
+
+  const timeoutMs = (Number(timeoutInput.value) || 12) * 1000;
+
+  btnAudit.disabled = true;
+  btnExportCsv.disabled = true;
+  btnExportJson.disabled = true;
+  btnClear.style.display = "none";
+  summaryEl.style.display = "none";
+  emptyStateEl.style.display = "none";
+  setStatus(`Auditando ${urls.length} site(s)...`, true);
+
+  try {
+    const res = await fetch(`${API_BASE}/api/audit?timeout=${timeoutMs}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ urls })
+    });
+
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({ error: res.statusText }));
+      throw new Error(e.error || res.statusText);
+    }
+
+    reportData = await res.json();
+    renderAll();
+    setStatus(`Auditoria concluída: ${reportData.total} site(s) verificados em ${new Date(reportData.geradoEm).toLocaleTimeString("pt-BR")}.`);
+    btnExportCsv.disabled = false;
+    btnExportJson.disabled = false;
+    btnClear.style.display = "";
+  } catch (e) {
+    setStatus("Erro: " + e.message);
+    showToast("Falha na auditoria: " + e.message, true);
+  } finally {
+    btnAudit.disabled = false;
+  }
+});
+
+btnClear.addEventListener("click", () => {
+  reportData = null;
+  summaryEl.style.display = "none";
+  emptyStateEl.style.display = "none";
+  tableBody.innerHTML = "";
+  setStatus("");
+  btnExportCsv.disabled = true;
+  btnExportJson.disabled = true;
+  btnClear.style.display = "none";
+  urlInput.value = "";
+});
+
+// ---------- render ----------
+
+function renderAll() {
+  if (!reportData) return;
+  const { porCriticidade, total, avgRiskScore } = reportData;
+  document.getElementById("sTotal").textContent   = total;
+  document.getElementById("sAvg").textContent     = avgRiskScore;
+  document.getElementById("sCritico").textContent = porCriticidade.Critico;
+  document.getElementById("sAlto").textContent    = porCriticidade.Alto;
+  document.getElementById("sMedio").textContent   = porCriticidade.Medio;
+  document.getElementById("sBaixo").textContent   = porCriticidade.Baixo;
+  summaryEl.style.display = "";
+  renderTable();
+}
+
+function getFilteredSorted() {
+  let sites = [...(reportData?.sites ?? [])];
+  const lvl = filterLevel.value;
+  const q   = searchInput.value.trim().toLowerCase();
+  if (lvl) sites = sites.filter(s => s.criticidade === lvl);
+  if (q)   sites = sites.filter(s => (s.target ?? "").toLowerCase().includes(q));
+
+  const order = sortAsc ? 1 : -1;
+  sites.sort((a, b) => {
+    let va = a[sortCol] ?? "";
+    let vb = b[sortCol] ?? "";
+    if (typeof va === "string") va = va.toLowerCase();
+    if (typeof vb === "string") vb = vb.toLowerCase();
+    return va < vb ? -order : va > vb ? order : 0;
+  });
+  return sites;
+}
+
+function checkVal(site, id) {
+  if (!site.checks) return null;
+  return site.checks.find(c => c.id === id);
+}
+
+function icon(passed, severity) {
+  if (passed === null) return `<span class="icon-med">—</span>`;
+  if (passed) return `<span class="icon-ok">&#x2714;</span>`;
+  const cls = severity === "high" ? "icon-err" : "icon-med";
+  return `<span class="${cls}">&#x2716;</span>`;
+}
+
+function cookieSummary(site) {
+  if (!site.checks) return "—";
+  const c = site.checks.find(c => c.id === "cookies");
+  if (!c) return "—";
+  if (c.passed) return `<span class="icon-ok">&#x2714;</span>`;
+  const total = (c.details.match(/cookie/gi) || []).length;
+  return `<span class="icon-err">&#x2716;</span> <span style="font-size:11px;color:var(--muted)">${c.details.substring(0,40)}...</span>`;
+}
+
+function tlsDays(site) {
+  if (!site.tls) return `<span class="tls-days" style="color:var(--muted)">—</span>`;
+  const d = site.tls.daysUntilExpiry;
+  if (d === null || d === undefined) return `<span class="tls-days" style="color:var(--muted)">N/A</span>`;
+  const color = d < 14 ? "var(--critico)" : d < 30 ? "var(--alto)" : "var(--baixo)";
+  return `<span class="tls-days" style="color:${color}">${d}d</span>`;
+}
+
+function renderTable() {
+  expandedRow = null;
+  const sites = getFilteredSorted();
+  if (sites.length === 0) {
+    tableBody.innerHTML = "";
+    emptyStateEl.style.display = "";
+    return;
+  }
+  emptyStateEl.style.display = "none";
+
+  const maxScore = 20;
+  tableBody.innerHTML = sites.map((s, i) => {
+    const lvl  = s.criticidade ?? "Baixo";
+    const https = checkVal(s, "https");
+    const hsts  = checkVal(s, "hsts");
+    const csp   = checkVal(s, "csp");
+    const pct   = Math.min(100, Math.round((s.riskScore / maxScore) * 100));
+    const url   = s.finalUrl || s.target || "";
+
+    const checksHtml = (s.checks || []).map(c => {
+      const cls = c.passed ? "pass" : c.severity === "high" ? "fail-high" : c.severity === "medium" ? "fail-medium" : "fail-low";
+      return `<div class="check-item ${cls}">
+        <div class="check-title">${c.passed ? "✔" : "✖"} ${c.title}</div>
+        <div class="check-details">${c.details}</div>
+        ${!c.passed ? `<div class="check-rec">&#x1F6E1; ${c.recommendation}</div>` : ""}
+      </div>`;
+    }).join("");
+
+    const errBadge = s.error ? `<span class="badge badge-erro">erro</span>` : `<span class="badge badge-${lvl}">${lvl}</span>`;
+
+    return `
+      <tr class="data-row" data-idx="${i}">
+        <td><div class="site-url" title="${url}">${s.target ?? url}</div></td>
+        <td>
+          <div class="score-bar-wrap">
+            <div class="score-bar"><div class="score-fill fill-${lvl}" style="width:${pct}%"></div></div>
+            <span>${s.riskScore ?? 0}</span>
+          </div>
+        </td>
+        <td>${errBadge}</td>
+        <td>${icon(https?.passed ?? null, "high")}</td>
+        <td>${icon(hsts?.passed ?? null, "high")}</td>
+        <td>${icon(csp?.passed ?? null, "medium")}</td>
+        <td>${tlsDays(s)}</td>
+        <td>${cookieSummary(s)}</td>
+        <td><button class="row-btn" title="Ver detalhes">&#x25BC;</button></td>
+      </tr>
+      <tr class="detail-row"><td colspan="9"><div class="detail-box">
+        <strong>Detalhes de ${s.target}</strong>
+        <div class="detail-grid">${checksHtml || '<em style="color:var(--muted)">Sem detalhes</em>'}</div>
+      </div></td></tr>`;
+  }).join("");
+
+  // click nas linhas para expandir
+  tableBody.querySelectorAll(".data-row").forEach(row => {
+    row.addEventListener("click", (e) => {
+      if (e.target.closest(".row-btn") || e.target.tagName === "A") return;
+      toggleRow(row);
+    });
+    row.querySelector(".row-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleRow(row);
+    });
+  });
+}
+
+function toggleRow(row) {
+  const wasExpanded = row.classList.contains("expanded");
+  tableBody.querySelectorAll(".data-row.expanded").forEach(r => r.classList.remove("expanded"));
+  if (!wasExpanded) row.classList.add("expanded");
+}
+
+// ---------- ordenacao ----------
+document.querySelectorAll("th[data-col]").forEach(th => {
+  th.addEventListener("click", () => {
+    const col = th.dataset.col;
+    if (sortCol === col) sortAsc = !sortAsc;
+    else { sortCol = col; sortAsc = false; }
+    document.querySelectorAll("th[data-col]").forEach(t => t.classList.remove("sorted"));
+    th.classList.add("sorted");
+    th.querySelector(".sort-icon").textContent = sortAsc ? "▲" : "▼";
+    renderTable();
+  });
+});
+
+filterLevel.addEventListener("change", renderTable);
+searchInput.addEventListener("input", renderTable);
+
+// ---------- CSV export ----------
+btnExportCsv.addEventListener("click", () => {
+  if (!reportData) return;
+  const sites = getFilteredSorted();
+  const sep = ";";
+  const esc = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+
+  const checks14 = ["https","hsts","csp","clickjacking","x-content-type-options","referrer-policy",
+    "permissions-policy","cors","server-banner","x-powered-by","cookies","security-txt","robots-txt","tls-cert"];
+
+  const header = ["URL","URL Final","Status HTTP","Risco","Criticidade","TLS (dias)",
+    ...checks14.map(id => id.toUpperCase()), "Recomendações"]
+    .map(esc).join(sep);
+
+  const rows = sites.map(s => {
+    const checks = s.checks ?? [];
+    const checkMap = Object.fromEntries(checks.map(c => [c.id, c]));
+    const recs = checks.filter(c => !c.passed).map(c => c.recommendation).join(" | ");
+    return [
+      s.target,
+      s.finalUrl ?? s.target,
+      s.status ?? "",
+      s.riskScore ?? 0,
+      s.criticidade ?? "",
+      s.tls?.daysUntilExpiry ?? "",
+      ...checks14.map(id => checkMap[id] ? (checkMap[id].passed ? "OK" : "FALHA") : "N/A"),
+      recs
+    ].map(esc).join(sep);
+  });
+
+  const bom = "\uFEFF";
+  const csv = bom + [header, ...rows].join("\r\n");
+  download(csv, `auditoria-${dateStamp()}.csv`, "text/csv;charset=utf-8");
+});
+
+// ---------- JSON export ----------
+btnExportJson.addEventListener("click", () => {
+  if (!reportData) return;
+  download(JSON.stringify(reportData, null, 2), `auditoria-${dateStamp()}.json`, "application/json");
+});
+
+function download(content, filename, mime) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([content], { type: mime }));
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function dateStamp() {
+  return new Date().toISOString().replace(/[:.]/g, "-").slice(0,19);
+}
+
+// ---------- utilitarios UI ----------
+function setStatus(msg, loading = false) {
+  statusEl.innerHTML = loading
+    ? `<span>${msg}</span><div class="progress-bar"><div class="progress-fill" id="pFill"></div></div>`
+    : `<span>${msg}</span>`;
+  if (loading) {
+    let w = 0;
+    const fill = document.getElementById("pFill");
+    const t = setInterval(() => { w = Math.min(w + 2, 90); fill && (fill.style.width = w + "%"); }, 300);
+    statusEl._timer = t;
+  } else if (statusEl._timer) {
+    clearInterval(statusEl._timer);
+    const fill = document.getElementById("pFill");
+    if (fill) fill.style.width = "100%";
+  }
+}
+
+function showToast(msg, isErr = false) {
+  const toast = document.getElementById("toast");
+  toast.textContent = msg;
+  toast.className = "show" + (isErr ? " toast-err" : "");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { toast.className = ""; }, 3500);
+}
+</script>
+</body>
+</html>

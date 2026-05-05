@@ -1,0 +1,11 @@
+<div *ngIf="authService.isAuthenticated()" class="navbar">
+  <div><strong>OrderHub</strong> | Projeto de entrevista Full Stack</div>
+  <div class="nav-links">
+    <a routerLink="/dashboard">Dashboard</a>
+    <a routerLink="/clients">Clientes</a>
+    <a routerLink="/products">Produtos</a>
+    <a routerLink="/orders">Pedidos</a>
+    <a href="#" (click)="logout()">Sair</a>
+  </div>
+</div>
+<router-outlet></router-outlet>

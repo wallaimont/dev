@@ -1,0 +1,41 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------------< com.orionerp:orion-erp >-----------------------
+[INFO] Building OrionERP 1.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ orion-erp ---
+[INFO] Deleting C:\Users\wallace\Desktop\Nova pasta (3)\orion-erp\backend\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ orion-erp ---
+[INFO] Copying 3 resources from src\main\resources to target\classes
+[INFO] Copying 14 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.0:compile (default-compile) @ orion-erp ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 541 source files with javac [forked debug parameters release 21] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ orion-erp ---
+[INFO] skip non existing resourceDirectory C:\Users\wallace\Desktop\Nova pasta (3)\orion-erp\backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.0:testCompile (default-testCompile) @ orion-erp ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 19 source files with javac [forked debug parameters release 21] to target\test-classes
+[WARNING] The following options were not recognized by any processor: '[mapstruct.defaultComponentModel]'
+[INFO] 
+[INFO] --- surefire:3.2.5:test (default-test) @ orion-erp ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ orion-erp ---
+[INFO] Building jar: C:\Users\wallace\Desktop\Nova pasta (3)\orion-erp\backend\target\orion-erp-1.0.0.jar
+[INFO] 
+[INFO] --- spring-boot:3.3.5:repackage (repackage) @ orion-erp ---
+[INFO] Replacing main artifact C:\Users\wallace\Desktop\Nova pasta (3)\orion-erp\backend\target\orion-erp-1.0.0.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to C:\Users\wallace\Desktop\Nova pasta (3)\orion-erp\backend\target\orion-erp-1.0.0.jar.original
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  28.245 s
+[INFO] Finished at: 2026-04-06T16:50:58-03:00
+[INFO] ------------------------------------------------------------------------

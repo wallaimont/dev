@@ -1,0 +1,13 @@
+node_modules
+.next
+dist
+coverage
+.env
+*.log
+.prisma
+.DS_Store
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+apps/web/.next
+apps/api/dist

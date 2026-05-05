@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "local-files": {
+      "command": "mcp-server-filesystem",
+      "args": [
+        "."
+      ]
+    }
+  }
+}

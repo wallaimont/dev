@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Financeiro')}"></head>
+<body>
+<div class="main-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div class="main-content">
+        <div th:replace="~{fragments/layout :: topbar}"></div>
+        <div class="content-area">
+            <div class="page-header">
+                <div><h1 class="page-title">Financeiro</h1><p class="page-subtitle">Contas a pagar e receber</p></div>
+                <button class="btn btn-primary" onclick="novoLancamento()"><i class="bi bi-plus-lg me-1"></i>Novo Lan&#231;amento</button>
+            </div>
+            <div class="table-container">
+                <div class="table-toolbar">
+                    <div class="table-filters">
+                        <select class="form-select" id="fTipo" onchange="loadFinanceiro()">
+                            <option value="">Todos os tipos</option>
+                            <option value="RECEITA">Receita</option>
+                            <option value="DESPESA">Despesa</option>
+                        </select>
+                        <select class="form-select" id="fStatus" onchange="loadFinanceiro()">
+                            <option value="">Todos os status</option>
+                            <option value="PENDENTE">Pendente</option>
+                            <option value="PAGO">Pago</option>
+                            <option value="ATRASADO">Atrasado</option>
+                        </select>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadFinanceiro()"><i class="bi bi-search me-1"></i>Filtrar</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead><tr><th>Tipo</th><th>Descri&#231;&#227;o</th><th>Valor</th><th>Vencimento</th><th>Pagamento</th><th>Status</th><th width="130">A&#231;&#245;es</th></tr></thead>
+                        <tbody id="tblData"><tr><td colspan="7" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Carregando...</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="table-pagination" id="pagination"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: toasts}"></div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>
+async function loadFinanceiro(page = 0) {
+    const params = new URLSearchParams({ page, size: 20 });
+    const tipo = document.getElementById('fTipo').value;
+    const status = document.getElementById('fStatus').value;
+    if (tipo) params.append('tipo', tipo);
+    if (status) params.append('status', status);
+    try {
+        const res = await API.get('/financeiro?' + params);
+        const data = res.data;
+        const tb = document.getElementById('tblData');
+        if (data.content.length === 0) {
+            tb.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>Nenhum lan\u00e7amento encontrado</td></tr>';
+        } else {
+            tb.innerHTML = data.content.map(f => `<tr>
+                <td><span class="badge ${f.tipo === 'RECEITA' ? 'bg-success' : 'bg-danger'}">${f.tipo}</span></td>
+                <td>${f.descricao}</td>
+                <td><strong>${formatCurrency(f.valor)}</strong></td>
+                <td>${formatDate(f.dataVencimento)}</td>
+                <td>${f.dataPagamento ? formatDate(f.dataPagamento) : '-'}</td>
+                <td>${statusBadge(f.status)}</td>
+                <td>
+                    ${canEdit('financeiro') ? `<button class="btn btn-icon btn-outline-primary btn-sm me-1" onclick="editarLancamento(${f.id})" title="Editar"><i class="bi bi-pencil"></i></button>` : ''}
+                    ${canEdit('financeiro') ? `<button class="btn btn-icon btn-outline-success btn-sm me-1" onclick="baixaLancamento(${f.id})" title="Baixa"><i class="bi bi-check-lg"></i></button>` : ''}
+                    ${canDelete('financeiro') ? `<button class="btn btn-icon btn-outline-danger btn-sm" onclick="excluirLancamento(${f.id})" title="Excluir"><i class="bi bi-trash"></i></button>` : ''}
+                </td>
+            </tr>`).join('');
+        }
+        document.getElementById('pagination').innerHTML = renderPagination(data, 'loadFinanceiro');
+    } catch (err) { showToast(err.message, 'danger'); }
+}
+
+function formLancamento(f = {}) {
+    return `<form id="formLancamento"><div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Tipo</label><select class="form-select" id="fLTipo" required>
+            <option value="RECEITA" ${f.tipo === 'RECEITA' ? 'selected' : ''}>Receita</option>
+            <option value="DESPESA" ${f.tipo === 'DESPESA' ? 'selected' : ''}>Despesa</option>
+        </select></div>
+        <div class="col-md-6"><label class="form-label">Valor</label><input type="number" step="0.01" class="form-control" id="fLValor" value="${f.valor || ''}" required></div>
+        <div class="col-md-12"><label class="form-label">Descri&#231;&#227;o</label><input type="text" class="form-control" id="fLDescricao" value="${f.descricao || ''}" required></div>
+        <div class="col-md-4"><label class="form-label">Vencimento</label><input type="text" class="form-control" id="fLVencimento" value="${f.dataVencimento || ''}" placeholder="dd/mm/aaaa" required></div>
+        <div class="col-md-4"><label class="form-label">Pagamento</label><input type="text" class="form-control" id="fLPagamento" value="${f.dataPagamento || ''}" placeholder="dd/mm/aaaa"></div>
+        <div class="col-md-4"><label class="form-label">Ap&#243;lice ID</label><input type="number" class="form-control" id="fLApoliceId" value="${f.apoliceId || ''}"></div>
+        <div class="col-12"><label class="form-label">Observa&#231;&#245;es</label><textarea class="form-control" id="fLObs" rows="2">${f.observacoes || ''}</textarea></div>
+    </div></form>`;
+}
+
+function getLancamentoData() {
+    return {
+        tipo: document.getElementById('fLTipo').value,
+        valor: document.getElementById('fLValor').value,
+        descricao: document.getElementById('fLDescricao').value,
+        dataVencimento: document.getElementById('fLVencimento').value,
+        dataPagamento: document.getElementById('fLPagamento').value || null,
+        apoliceId: document.getElementById('fLApoliceId').value || null,
+        observacoes: document.getElementById('fLObs').value
+    };
+}
+
+function novoLancamento() {
+    showModal('Novo Lan\u00e7amento', formLancamento(), async () => {
+        await API.post('/financeiro', getLancamentoData());
+        showToast('Lan\u00e7amento criado com sucesso');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadFinanceiro();
+    });
+}
+
+async function editarLancamento(id) {
+    const res = await API.get('/financeiro/' + id);
+    showModal('Editar Lan\u00e7amento', formLancamento(res.data), async () => {
+        await API.put('/financeiro/' + id, getLancamentoData());
+        showToast('Lan\u00e7amento atualizado');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadFinanceiro();
+    });
+}
+
+async function baixaLancamento(id) {
+    if (!confirm('Confirma a baixa deste lan\u00e7amento?')) return;
+    await API.patch('/financeiro/' + id + '/baixa');
+    showToast('Baixa realizada');
+    loadFinanceiro();
+}
+
+async function excluirLancamento(id) {
+    if (!confirm('Deseja excluir este lan\u00e7amento?')) return;
+    await API.del('/financeiro/' + id);
+    showToast('Lan\u00e7amento exclu\u00eddo');
+    loadFinanceiro();
+}
+
+document.addEventListener('DOMContentLoaded', loadFinanceiro);
+</script>
+</body>
+</html>

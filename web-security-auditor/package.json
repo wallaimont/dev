@@ -1,0 +1,26 @@
+{
+  "name": "web-security-auditor",
+  "version": "1.0.0",
+  "description": "Auditoria defensiva de segurança web com checagens passivas",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "audit": "node src/index.js",
+    "audit:json": "node src/index.js --json",
+    "server": "node src/server.js",
+    "zap": "node src/zap-cli.js",
+    "zap:full": "node src/zap-cli.js --mode full --summary",
+    "zap:baseline": "node src/zap-cli.js --mode baseline --summary"
+  },
+  "keywords": [
+    "security",
+    "headers",
+    "tls",
+    "audit",
+    "owasp",
+    "zap",
+    "dast",
+    "pentest"
+  ],
+  "license": "MIT"
+}

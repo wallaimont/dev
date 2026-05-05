@@ -1,0 +1,139 @@
+{
+  "common": {
+    "appName": "Orbyt Market",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "search": "Search",
+    "noResults": "No results found",
+    "logout": "Sign out",
+    "login": "Sign in",
+    "register": "Register"
+  },
+  "nav": {
+    "home": "Home",
+    "catalog": "Catalog",
+    "cart": "Cart",
+    "buyer": "Buyer",
+    "orders": "Orders",
+    "chat": "Chat",
+    "notifications": "Notifications",
+    "support": "Support",
+    "seller": "Seller",
+    "products": "Products",
+    "admin": "Admin",
+    "profile": "Profile",
+    "wishlist": "Wishlist",
+    "reviews": "Reviews",
+    "payouts": "Payouts",
+    "users": "Users",
+    "coupons": "Coupons",
+    "cms": "CMS",
+    "fraud": "Fraud"
+  },
+  "home": {
+    "title": "Enterprise marketplace to operate multiple sellers, tenants, and channels with global startup standards.",
+    "subtitle": "Premium structure for catalog, checkout, split payment, PIX, logistics, observability, and corporate dashboards.",
+    "buyer": "Buyer area",
+    "admin": "Admin panel"
+  },
+  "auth": {
+    "loginTitle": "Sign in",
+    "registerTitle": "Create account",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "loginButton": "Sign in",
+    "registerButton": "Create account",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "invalidCredentials": "Invalid email or password",
+    "registerError": "Error creating account. Try again."
+  },
+  "catalog": {
+    "title": "Catalog",
+    "searchPlaceholder": "Search products...",
+    "addToCart": "+ Cart",
+    "products": "products available"
+  },
+  "cart": {
+    "title": "Cart",
+    "empty": "Empty cart",
+    "emptySubtitle": "Add products from the catalog to get started",
+    "goToCatalog": "Go to catalog",
+    "remove": "Remove",
+    "total": "Cart total",
+    "checkout": "Checkout"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "orderSummary": "Order summary",
+    "coupon": "Discount coupon",
+    "couponPlaceholder": "Enter coupon",
+    "applyCoupon": "Apply",
+    "invalidCoupon": "Invalid or expired coupon",
+    "discountApplied": "Discount applied",
+    "payment": "Payment",
+    "pix": "PIX (instant approval)",
+    "creditCard": "Credit card",
+    "boleto": "Bank slip",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "confirm": "Confirm order",
+    "processing": "Processing..."
+  },
+  "orders": {
+    "title": "My Orders",
+    "continueShopping": "Continue shopping",
+    "noOrders": "No orders",
+    "noOrdersSubtitle": "You haven't made any purchases yet",
+    "order": "Order",
+    "total": "Total",
+    "tracking": "Tracking"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "unread": "Unread",
+    "previous": "Previous",
+    "markRead": "Mark read",
+    "empty": "No notifications",
+    "emptySubtitle": "You're all caught up!"
+  },
+  "support": {
+    "title": "Support",
+    "newTicket": "New ticket",
+    "subject": "Subject",
+    "category": "Category",
+    "message": "Describe your problem...",
+    "submit": "Open ticket",
+    "submitting": "Submitting...",
+    "yourTickets": "Your tickets",
+    "noTickets": "No open tickets",
+    "categories": {
+      "ORDER_ISSUE": "Order issue",
+      "PAYMENT": "Payment",
+      "SHIPPING": "Shipping",
+      "PRODUCT": "Product",
+      "ACCOUNT": "Account",
+      "OTHER": "Other"
+    }
+  },
+  "seller": {
+    "revenue": "Net revenue",
+    "pendingOrders": "Orders to ship",
+    "payout": "Expected payout",
+    "newProduct": "New product",
+    "createProduct": "Create product",
+    "receivedOrders": "Received orders"
+  },
+  "admin": {
+    "session": "Admin session",
+    "gmv": "GMV",
+    "fraud": "Anti-fraud",
+    "sellers": "Active sellers"
+  }
+}

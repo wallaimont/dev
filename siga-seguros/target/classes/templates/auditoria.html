@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Auditoria')}"></head>
+<body>
+<div class="main-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div class="main-content">
+        <div th:replace="~{fragments/layout :: topbar}"></div>
+        <div class="content-area">
+            <div class="page-header">
+                <div><h1 class="page-title">Auditoria</h1><p class="page-subtitle">Registro de a&#231;&#245;es do sistema</p></div>
+            </div>
+            <div class="table-container">
+                <div class="table-toolbar">
+                    <div class="table-filters">
+                        <input type="text" class="form-control" id="fEntidade" placeholder="Entidade..." onkeyup="if(event.key==='Enter')loadAuditoria()">
+                        <input type="text" class="form-control" id="fUsuario" placeholder="Usu&#225;rio..." onkeyup="if(event.key==='Enter')loadAuditoria()">
+                        <select class="form-select" id="fAcao" onchange="loadAuditoria()">
+                            <option value="">Todas as a&#231;&#245;es</option>
+                            <option value="CRIACAO">Cria&#231;&#227;o</option>
+                            <option value="ATUALIZACAO">Atualiza&#231;&#227;o</option>
+                            <option value="EXCLUSAO">Exclus&#227;o</option>
+                            <option value="LOGIN">Login</option>
+                        </select>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadAuditoria()"><i class="bi bi-search me-1"></i>Filtrar</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead><tr><th>Data/Hora</th><th>Usu&#225;rio</th><th>Entidade</th><th>ID</th><th>A&#231;&#227;o</th><th>Detalhes</th></tr></thead>
+                        <tbody id="tblData"><tr><td colspan="6" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Carregando...</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="table-pagination" id="pagination"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: toasts}"></div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>
+async function loadAuditoria(page = 0) {
+    const params = new URLSearchParams({ page, size: 30 });
+    const entidade = document.getElementById('fEntidade').value;
+    const usuario = document.getElementById('fUsuario').value;
+    const acao = document.getElementById('fAcao').value;
+    if (entidade) params.append('entidade', entidade);
+    if (usuario) params.append('usuario', usuario);
+    if (acao) params.append('acao', acao);
+    try {
+        const res = await API.get('/auditoria?' + params);
+        const data = res.data;
+        const tb = document.getElementById('tblData');
+        if (data.content.length === 0) {
+            tb.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>Nenhum registro encontrado</td></tr>';
+        } else {
+            tb.innerHTML = data.content.map(a => {
+                const acaoBadge = {
+                    'CRIACAO': 'bg-success', 'ATUALIZACAO': 'bg-primary',
+                    'EXCLUSAO': 'bg-danger', 'LOGIN': 'bg-info'
+                };
+                return `<tr>
+                    <td>${new Date(a.dataHora).toLocaleString('pt-BR')}</td>
+                    <td>${a.usuarioNome || '-'}</td>
+                    <td><span class="badge bg-secondary-subtle text-secondary">${a.entidade}</span></td>
+                    <td>${a.entidadeId || '-'}</td>
+                    <td><span class="badge ${acaoBadge[a.acao] || 'bg-secondary'}">${a.acao}</span></td>
+                    <td><small class="text-muted">${a.detalhes || '-'}</small></td>
+                </tr>`;
+            }).join('');
+        }
+        document.getElementById('pagination').innerHTML = renderPagination(data, 'loadAuditoria');
+    } catch (err) { showToast(err.message, 'danger'); }
+}
+
+document.addEventListener('DOMContentLoaded', loadAuditoria);
+</script>
+</body>
+</html>

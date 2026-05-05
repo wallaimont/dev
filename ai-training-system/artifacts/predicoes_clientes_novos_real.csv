@@ -1,0 +1,5 @@
+age,monthly_spend,contract_months,support_tickets,payment_method,prediction
+22,75.0,2,5,credit_card,1
+47,68.0,26,0,boleto,0
+34,150.0,5,4,pix,1
+56,58.0,32,0,debit_card,0

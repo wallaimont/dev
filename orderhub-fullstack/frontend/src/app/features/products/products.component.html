@@ -1,0 +1,33 @@
+<div class="container">
+  <h1 style="margin-bottom: 20px;">Produtos</h1>
+
+  <div class="card" style="margin-bottom: 20px;">
+    <h3 style="margin-bottom: 16px;">Novo produto</h3>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
+      <div><label>Nome</label><input formControlName="name"></div>
+      <div><label>Descrição</label><input formControlName="description"></div>
+      <div><label>Categoria</label><input formControlName="category"></div>
+      <div><label>Preço</label><input type="number" formControlName="price"></div>
+      <div><label>Estoque</label><input type="number" formControlName="stock"></div>
+      <div><button class="btn btn-primary" type="submit">Salvar produto</button></div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Lista de produtos</h3>
+    <table class="table">
+      <thead>
+      <tr><th>ID</th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Estoque</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of products">
+          <td>{{ product.id }}</td>
+          <td>{{ product.name }}</td>
+          <td>{{ product.category }}</td>
+          <td>{{ product.price | currency:'BRL' }}</td>
+          <td>{{ product.stock }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

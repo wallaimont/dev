@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Renova\u00e7\u00f5es')}"></head>
+<body>
+<div class="main-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div class="main-content">
+        <div th:replace="~{fragments/layout :: topbar}"></div>
+        <div class="content-area">
+            <div class="page-header">
+                <div><h1 class="page-title">Renova&#231;&#245;es</h1><p class="page-subtitle">Acompanhamento de renova&#231;&#245;es de ap&#243;lices</p></div>
+                <button class="btn btn-primary" onclick="novaRenovacao()"><i class="bi bi-plus-lg me-1"></i>Nova Renova&#231;&#227;o</button>
+            </div>
+            <div class="table-container">
+                <div class="table-toolbar">
+                    <div class="table-filters">
+                        <select class="form-select" id="fStatus" onchange="loadRenovacoes()">
+                            <option value="">Todos os status</option>
+                            <option value="PENDENTE">Pendente</option>
+                            <option value="CONTATO_REALIZADO">Contato Realizado</option>
+                            <option value="RENOVADA">Renovada</option>
+                            <option value="NAO_RENOVADA">N&#227;o Renovada</option>
+                        </select>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadRenovacoes()"><i class="bi bi-search me-1"></i>Filtrar</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead><tr><th>Ap&#243;lice</th><th>Cliente</th><th>Vencimento</th><th>Respons&#225;vel</th><th>Status</th><th width="130">A&#231;&#245;es</th></tr></thead>
+                        <tbody id="tblData"><tr><td colspan="6" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Carregando...</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="table-pagination" id="pagination"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: toasts}"></div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>
+async function loadRenovacoes(page = 0) {
+    const params = new URLSearchParams({ page, size: 20 });
+    const status = document.getElementById('fStatus').value;
+    if (status) params.append('status', status);
+    try {
+        const res = await API.get('/renovacoes?' + params);
+        const data = res.data;
+        const tb = document.getElementById('tblData');
+        if (data.content.length === 0) {
+            tb.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>Nenhuma renova\u00e7\u00e3o encontrada</td></tr>';
+        } else {
+            tb.innerHTML = data.content.map(r => `<tr>
+                <td><strong>${r.apoliceNumero}</strong></td>
+                <td>${r.clienteNome}</td>
+                <td>${formatDate(r.dataVencimento)}</td>
+                <td>${r.responsavel || '-'}</td>
+                <td>${statusBadge(r.status)}</td>
+                <td>
+                    ${canEdit('renovacoes') ? `<button class="btn btn-icon btn-outline-primary btn-sm me-1" onclick="editarRenovacao(${r.id})" title="Editar"><i class="bi bi-pencil"></i></button>` : ''}
+                    ${canEdit('renovacoes') ? `<button class="btn btn-icon btn-outline-warning btn-sm" onclick="alterarStatusRenovacao(${r.id})" title="Status"><i class="bi bi-arrow-repeat"></i></button>` : ''}
+                </td>
+            </tr>`).join('');
+        }
+        document.getElementById('pagination').innerHTML = renderPagination(data, 'loadRenovacoes');
+    } catch (err) { showToast(err.message, 'danger'); }
+}
+
+function formRenovacao(r = {}) {
+    return `<form id="formRenovacao"><div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Ap&#243;lice ID</label><input type="number" class="form-control" id="rApoliceId" value="${r.apoliceId || ''}" required></div>
+        <div class="col-md-6"><label class="form-label">Data Vencimento</label><input type="text" class="form-control" id="rVencimento" value="${r.dataVencimento || ''}" placeholder="dd/mm/aaaa"></div>
+        <div class="col-md-6"><label class="form-label">Data Contato</label><input type="text" class="form-control" id="rContato" value="${r.dataContato || ''}" placeholder="dd/mm/aaaa"></div>
+        <div class="col-md-6"><label class="form-label">Respons&#225;vel</label><input type="text" class="form-control" id="rResponsavel" value="${r.responsavel || ''}"></div>
+        <div class="col-12"><label class="form-label">Observa&#231;&#245;es</label><textarea class="form-control" id="rObs" rows="2">${r.observacoes || ''}</textarea></div>
+    </div></form>`;
+}
+
+function getRenovacaoData() {
+    return {
+        apoliceId: document.getElementById('rApoliceId').value,
+        dataVencimento: document.getElementById('rVencimento').value,
+        dataContato: document.getElementById('rContato').value,
+        responsavel: document.getElementById('rResponsavel').value,
+        observacoes: document.getElementById('rObs').value
+    };
+}
+
+function novaRenovacao() {
+    showModal('Nova Renova\u00e7\u00e3o', formRenovacao(), async () => {
+        await API.post('/renovacoes', getRenovacaoData());
+        showToast('Renova\u00e7\u00e3o criada com sucesso');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadRenovacoes();
+    });
+}
+
+async function editarRenovacao(id) {
+    const res = await API.get('/renovacoes/' + id);
+    showModal('Editar Renova\u00e7\u00e3o', formRenovacao(res.data), async () => {
+        await API.put('/renovacoes/' + id, getRenovacaoData());
+        showToast('Renova\u00e7\u00e3o atualizada');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadRenovacoes();
+    });
+}
+
+function alterarStatusRenovacao(id) {
+    showModal('Alterar Status', `<select class="form-select" id="novoStatus">
+        <option value="PENDENTE">Pendente</option><option value="CONTATO_REALIZADO">Contato Realizado</option>
+        <option value="RENOVADA">Renovada</option><option value="NAO_RENOVADA">N\u00e3o Renovada</option>
+    </select>`, async () => {
+        await API.patch('/renovacoes/' + id + '/status?status=' + document.getElementById('novoStatus').value);
+        showToast('Status alterado');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadRenovacoes();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', loadRenovacoes);
+</script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal do Cliente — InsuranceFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+    :root {
+        --primary: #4F46E5; --primary-dark: #3730A3; --primary-light: #818CF8; --primary-50: #EEF2FF;
+        --secondary: #0F172A; --accent-green: #10B981; --accent-amber: #F59E0B; --accent-rose: #F43F5E;
+        --accent-cyan: #06B6D4;
+        --surface: #FFFFFF; --surface-2: #F8FAFC; --surface-3: #F1F5F9;
+        --text: #0F172A; --text-secondary: #64748B; --text-muted: #94A3B8; --border: #E2E8F0;
+        --radius: 16px; --radius-sm: 10px; --radius-xs: 6px;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,.06); --shadow: 0 4px 24px rgba(0,0,0,.08); --shadow-lg: 0 12px 48px rgba(0,0,0,.12);
+        --gradient: linear-gradient(135deg, #4F46E5, #7C3AED);
+        --gradient-green: linear-gradient(135deg, #10B981, #059669);
+        --gradient-amber: linear-gradient(135deg, #F59E0B, #D97706);
+        --gradient-rose: linear-gradient(135deg, #F43F5E, #E11D48);
+        --gradient-cyan: linear-gradient(135deg, #06B6D4, #0891B2);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--text);background:var(--surface-2);line-height:1.6;-webkit-font-smoothing:antialiased}
+
+    /* HEADER */
+    .portal-header{background:var(--secondary);color:#fff;padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(20px)}
+    .portal-logo{display:flex;align-items:center;gap:12px;font-weight:800;font-size:1.1rem;letter-spacing:-.3px}
+    .logo-icon{width:36px;height:36px;background:var(--gradient);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;box-shadow:0 4px 12px rgba(79,70,229,.4)}
+    .portal-nav{display:flex;gap:2px}
+    .portal-nav a{color:rgba(255,255,255,.5);text-decoration:none;padding:8px 16px;border-radius:8px;font-size:.85rem;font-weight:500;transition:all .2s;cursor:pointer;position:relative}
+    .portal-nav a:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.85)}
+    .portal-nav a.active{background:rgba(79,70,229,.3);color:#fff}
+    .portal-nav a .nav-badge{position:absolute;top:2px;right:4px;font-size:.6rem;font-weight:700;padding:1px 5px;border-radius:8px;background:var(--accent-rose);color:#fff;min-width:16px;text-align:center}
+    .portal-right{display:flex;align-items:center;gap:12px}
+    .topbar-btn{width:36px;height:36px;border-radius:10px;border:none;background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;position:relative}
+    .topbar-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+    .topbar-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+    .topbar-btn .dot{width:8px;height:8px;border-radius:50%;background:var(--accent-rose);position:absolute;top:6px;right:6px;border:2px solid var(--secondary)}
+    .user-pill{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border-radius:20px;background:rgba(255,255,255,.06);font-size:.82rem;color:rgba(255,255,255,.8)}
+    .user-avatar{width:28px;height:28px;border-radius:50%;background:var(--gradient-green);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.65rem;color:#fff}
+
+    /* CONTENT */
+    .content{max-width:1280px;margin:0 auto;padding:28px 24px}
+    .page{display:none}.page.active{display:block}
+
+    /* WELCOME */
+    .welcome-hero{background:var(--gradient);border-radius:var(--radius);padding:36px 40px;color:#fff;margin-bottom:28px;position:relative;overflow:hidden}
+    .welcome-hero::after{content:'';position:absolute;top:-50%;right:-10%;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,.06)}
+    .welcome-hero h2{font-size:1.6rem;font-weight:800;letter-spacing:-.3px;position:relative;z-index:1}
+    .welcome-hero p{color:rgba(255,255,255,.7);font-size:.95rem;margin-top:6px;position:relative;z-index:1}
+
+    /* METRIC CARDS */
+    .metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+    .metric-card{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:16px;border:1px solid var(--border);transition:all .2s}
+    .metric-card:hover{box-shadow:var(--shadow);transform:translateY(-2px)}
+    .mc-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .mc-icon svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+    .mc-label{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted)}
+    .mc-value{font-size:1.5rem;font-weight:800;color:var(--text);letter-spacing:-.3px;margin-top:2px}
+
+    /* CARDS */
+    .card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);margin-bottom:24px;overflow:hidden}
+    .card-header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .card-header h3{font-size:.95rem;font-weight:700;color:var(--text)}
+    .card-body{padding:16px 24px}
+    .no-pad{padding:0}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+
+    /* TABLE */
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse}
+    th{text-align:left;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface-2)}
+    td{padding:12px 16px;font-size:.85rem;border-bottom:1px solid var(--border)}
+    tr:last-child td{border-bottom:none}
+    .td-bold{font-weight:600;color:var(--text)}.td-secondary{color:var(--text-secondary)}
+    .badge{display:inline-flex;padding:3px 10px;border-radius:6px;font-size:.7rem;font-weight:700;letter-spacing:.3px}
+    .badge-green{background:rgba(16,185,129,.1);color:#059669}.badge-blue{background:rgba(59,130,246,.1);color:#2563EB}
+    .badge-amber{background:rgba(245,158,11,.1);color:#D97706}.badge-rose{background:rgba(244,63,94,.1);color:#E11D48}
+    .badge-gray{background:rgba(100,116,139,.1);color:#64748B}.badge-purple{background:rgba(139,92,246,.1);color:#7C3AED}
+
+    /* BUTTONS */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);font-weight:600;font-size:.85rem;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+    .btn-primary{background:var(--gradient);color:#fff;box-shadow:0 2px 8px rgba(79,70,229,.3)}.btn-primary:hover{box-shadow:0 4px 16px rgba(79,70,229,.4);transform:translateY(-1px)}
+    .btn-sm{padding:6px 12px;font-size:.78rem;border-radius:var(--radius-xs)}
+    .btn-secondary{background:var(--surface);border:1px solid var(--border);color:var(--text)}
+    .btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+    /* NOTIF */
+    .notif-item{display:flex;gap:14px;padding:14px 24px;border-bottom:1px solid var(--border);transition:background .15s}
+    .notif-item:hover{background:var(--surface-2)}.notif-item:last-child{border-bottom:none}
+    .notif-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem}
+    .notif-icon.info{background:rgba(59,130,246,.1)}.notif-icon.warning{background:rgba(245,158,11,.1)}.notif-icon.error{background:rgba(244,63,94,.1)}.notif-icon.success{background:rgba(16,185,129,.1)}
+    .notif-body{flex:1}.notif-title{font-size:.88rem;font-weight:600}.notif-msg{font-size:.8rem;color:var(--text-secondary);margin-top:2px}
+    .notif-time{font-size:.72rem;color:var(--text-muted);white-space:nowrap}
+    .unread{background:var(--primary-50)!important}
+
+    .section-title{font-size:1.15rem;font-weight:800;color:var(--text);letter-spacing:-.3px;margin-bottom:20px}
+    .empty-state{text-align:center;padding:48px;color:var(--text-muted)}.empty-state svg{width:48px;height:48px;margin-bottom:12px;stroke:var(--text-muted);fill:none;stroke-width:1.5}
+
+    /* FOOTER */
+    .portal-footer{text-align:center;padding:32px;color:var(--text-muted);font-size:.78rem;border-top:1px solid var(--border);margin-top:48px}
+
+    @media(max-width:1024px){.metrics-grid{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}}
+    @media(max-width:768px){.portal-nav{display:none}.metrics-grid{grid-template-columns:1fr}.content{padding:20px 16px}}
+    </style>
+</head>
+<body>
+    <header class="portal-header" id="portalHeader">
+        <div class="portal-logo"><span class="logo-icon" id="portalLogoIcon">IF</span> <span id="portalNome">Portal do Segurado</span></div>
+        <nav class="portal-nav">
+            <a class="active" data-page="home">Início</a>
+            <a data-page="apolices">Apólices</a>
+            <a data-page="propostas">Propostas</a>
+            <a data-page="sinistros">Sinistros</a>
+            <a data-page="boletos">Boletos</a>
+            <a data-page="notificacoes">Notificações<span class="nav-badge" id="navNotifBadge" style="display:none">0</span></a>
+            <a data-page="assinaturas">Assinaturas</a>
+        </nav>
+        <div class="portal-right">
+            <button class="topbar-btn" onclick="navigateTo('notificacoes')" title="Notificações"><svg viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="dot" id="notifDotPortal" style="display:none"></span></button>
+            <div class="user-pill"><div class="user-avatar" id="userAvatar">?</div><span id="userName">Carregando...</span></div>
+            <button class="topbar-btn" onclick="logout()" title="Sair"><svg viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></button>
+        </div>
+    </header>
+
+    <div class="content">
+        <!-- HOME -->
+        <div class="page active" id="page-home">
+            <div class="welcome-hero"><h2 id="welcomeName">Bem-vindo!</h2><p>Acompanhe suas apólices, sinistros e boletos em um só lugar.</p></div>
+            <div class="metrics-grid">
+                <div class="metric-card"><div class="mc-icon" style="background:var(--gradient)"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div><div class="mc-info"><div class="mc-label">Apólices Ativas</div><div class="mc-value" id="scApolices">0</div></div></div>
+                <div class="metric-card"><div class="mc-icon" style="background:var(--gradient-amber)"><svg viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></div><div class="mc-info"><div class="mc-label">Sinistros Abertos</div><div class="mc-value" id="scSinistros">0</div></div></div>
+                <div class="metric-card"><div class="mc-icon" style="background:var(--gradient-rose)"><svg viewBox="0 0 24 24"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg></div><div class="mc-info"><div class="mc-label">Boletos Pendentes</div><div class="mc-value" id="scBoletos">0</div></div></div>
+                <div class="metric-card"><div class="mc-icon" style="background:var(--gradient-cyan)"><svg viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5"/></svg></div><div class="mc-info"><div class="mc-label">Notificações</div><div class="mc-value" id="scNotifs">0</div></div></div>
+            </div>
+            <div class="grid-2">
+                <div class="card"><div class="card-header"><h3>Últimas Apólices</h3><a style="font-size:.8rem;color:var(--primary);cursor:pointer;font-weight:600;text-decoration:none" data-page="apolices">Ver todas →</a></div><div class="card-body no-pad"><div class="table-wrap"><table><thead><tr><th>Nº Apólice</th><th>Tipo</th><th>Vigência</th><th>Status</th></tr></thead><tbody id="homeApolices"></tbody></table></div></div></div>
+                <div class="card"><div class="card-header"><h3>Últimos Boletos</h3><a style="font-size:.8rem;color:var(--primary);cursor:pointer;font-weight:600;text-decoration:none" data-page="boletos">Ver todos →</a></div><div class="card-body no-pad"><div class="table-wrap"><table><thead><tr><th>Vencimento</th><th>Valor</th><th>Status</th></tr></thead><tbody id="homeBoletos"></tbody></table></div></div></div>
+            </div>
+        </div>
+
+        <!-- APOLICES -->
+        <div class="page" id="page-apolices">
+            <h2 class="section-title">Minhas Apólices</h2>
+            <div class="card"><div class="card-body no-pad"><div class="table-wrap"><table><thead><tr><th>Nº Apólice</th><th>Tipo Seguro</th><th>Vigência Início</th><th>Vigência Fim</th><th>Prêmio</th><th>Status</th></tr></thead><tbody id="apolicesTablePortal"></tbody></table></div></div></div>
+        </div>
+
+        <!-- PROPOSTAS -->
+        <div class="page" id="page-propostas">
+            <h2 class="section-title">Minhas Propostas</h2>
+            <div class="card"><div class="card-body no-pad"><div class="table-wrap"><table><thead><tr><th>Nº Proposta</th><th>Tipo Seguro</th><th>Vigência</th><th>Prêmio</th><th>Status</th></tr></thead><tbody id="propostasTablePortal"></tbody></table></div></div></div>
+        </div>
+
+        <!-- SINISTROS -->
+        <div class="page" id="page-sinistros">
+            <h2 class="section-title">Meus Sinistros</h2>
+            <div class="card"><div class="card-body no-pad"><div class="table-wrap"><table><thead><tr><th>Nº Sinistro</th><th>Tipo</th><th>Data Ocorrência</th><th>Valor Estimado</th><th>Status</th></tr></thead><tbody id="sinistrosTablePortal"></tbody></table></div></div></div>
+        </div>
+
+        <!-- BOLETOS -->
+        <div class="page" id="page-boletos">
+            <h2 class="section-title">Meus Boletos</h2>
+            <div class="card"><div class="card-body no-pad"><div class="table-wrap"><table><thead><tr><th>Parcela</th><th>Vencimento</th><th>Valor</th><th>Status</th><th>Ação</th></tr></thead><tbody id="boletosTablePortal"></tbody></table></div></div></div>
+        </div>
+
+        <!-- NOTIFICACOES -->
+        <div class="page" id="page-notificacoes">
+            <h2 class="section-title">Notificações</h2>
+            <div class="card"><div class="card-body no-pad" id="notificacoesBody"></div></div>
+        </div>
+
+        <!-- ASSINATURAS DIGITAIS -->
+        <div class="page" id="page-assinaturas">
+            <h2 class="section-title">Assinaturas Digitais Pendentes</h2>
+            <div class="card"><div class="card-body no-pad"><div class="table-wrap"><table><thead><tr><th>Documento</th><th>Entidade</th><th>Status</th><th>Data Assinatura</th><th>Ação</th></tr></thead><tbody id="assinaturasTablePortal"></tbody></table></div></div></div>
+        </div>
+    </div>
+
+    <footer class="portal-footer" id="portalFooter">© 2025 InsuranceFlow — Todos os direitos reservados.</footer>
+
+    <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login';
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+
+    // NAVIGATION
+    function navigateTo(page){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.portal-nav a').forEach(n=>n.classList.remove('active'));const el=document.getElementById('page-'+page);if(el)el.classList.add('active');const nav=document.querySelector(`.portal-nav [data-page="${page}"]`);if(nav)nav.classList.add('active');}
+    document.querySelectorAll('[data-page]').forEach(el=>el.addEventListener('click',()=>navigateTo(el.dataset.page)));
+
+    // UTILS
+    function fmtDate(d){return d?new Date(d).toLocaleDateString('pt-BR'):'-'}
+    function fmtDateTime(d){return d?new Date(d).toLocaleString('pt-BR'):'-'}
+    function formatCurrency(v){return'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}
+    function logout(){localStorage.clear();window.location.href='/login'}
+    function statusBadge(s){const m={'VIGENTE':'badge-green','ATIVA':'badge-green','APROVADA':'badge-green','PAGO':'badge-green','PAGA':'badge-green','ASSINADO':'badge-green','RASCUNHO':'badge-gray','CANCELADA':'badge-gray','VENCIDA':'badge-gray','VENCIDO':'badge-rose','EMITIDA':'badge-blue','EM_ANALISE':'badge-blue','ABERTO':'badge-blue','PENDENTE':'badge-amber','ATRASADO':'badge-amber','RECUSADA':'badge-rose','CANCELADO':'badge-rose','ENVIADO':'badge-green'};return'<span class="badge '+(m[s]||'badge-gray')+'">'+(s||'—').replace(/_/g,' ')+'</span>'}
+
+    async function api(url,opts={}){try{const r=await fetch(url,{headers,...opts});if(r.status===401||r.status===403){logout();return null}return await r.json()}catch(e){return null}}
+
+    // WHITE-LABEL
+    async function loadWhiteLabel(){
+        const json=await api('/api/portal/white-label');if(!json||!json.success||!json.data)return;const d=json.data;
+        const r=document.documentElement;
+        // Nome do sistema e portal
+        if(d.nomeSistema||d.nomePortalCliente){
+            const nome=d.nomePortalCliente||d.nomeSistema;
+            document.getElementById('portalNome').textContent=nome;
+            document.title=nome;
+        }
+        // Logo
+        if(d.logoUrl){
+            const logoIcon=document.getElementById('portalLogoIcon');
+            logoIcon.innerHTML='<img src="'+d.logoUrl+'" style="width:100%;height:100%;object-fit:contain;border-radius:inherit" onerror="this.parentElement.textContent=\'IF\'">';
+        } else if(d.nomeSistema){
+            document.getElementById('portalLogoIcon').textContent=d.nomeSistema.substring(0,2).toUpperCase();
+        }
+        // Favicon
+        if(d.faviconUrl){let link=document.querySelector('link[rel~=icon]');if(!link){link=document.createElement('link');link.rel='icon';document.head.appendChild(link);}link.href=d.faviconUrl;}
+        // Cores
+        if(d.corPrimaria){
+            r.style.setProperty('--primary',d.corPrimaria);
+            r.style.setProperty('--primary-dark',adjustColor(d.corPrimaria,-30));
+            r.style.setProperty('--primary-light',adjustColor(d.corPrimaria,40));
+            r.style.setProperty('--primary-50',d.corPrimaria+'12');
+            r.style.setProperty('--gradient','linear-gradient(135deg,'+d.corPrimaria+','+(d.corSecundaria||d.corPrimaria)+')');
+        }
+        if(d.corAcento){r.style.setProperty('--accent-green',d.corAcento);r.style.setProperty('--gradient-green','linear-gradient(135deg,'+d.corAcento+','+adjustColor(d.corAcento,-20)+')');}
+        if(d.corFundo)r.style.setProperty('--surface-2',d.corFundo);
+        // Footer com rodapé, email e telefone
+        const footer=document.getElementById('portalFooter');
+        if(d.rodape)footer.textContent=d.rodape;
+        const parts=[];
+        if(d.emailSuporte)parts.push(d.emailSuporte);
+        if(d.telefoneSuporte)parts.push(d.telefoneSuporte);
+        if(parts.length)footer.textContent+=' \u00B7 '+parts.join(' \u00B7 ');
+        // Texto institucional no welcome
+        if(d.textoInstitucional){
+            const wh=document.querySelector('.welcome-hero');
+            if(wh){let ti=document.getElementById('portalTextoInst');
+            if(!ti){ti=document.createElement('p');ti.id='portalTextoInst';ti.style.cssText='margin-top:10px;font-size:.9rem;opacity:.85;max-width:600px';wh.appendChild(ti);}
+            ti.textContent=d.textoInstitucional;}
+        }
+    }
+    function adjustColor(hex,amt){let c=hex.replace('#','');if(c.length===3)c=c[0]+c[0]+c[1]+c[1]+c[2]+c[2];let r=Math.max(0,Math.min(255,parseInt(c.substring(0,2),16)+amt));let g=Math.max(0,Math.min(255,parseInt(c.substring(2,4),16)+amt));let b=Math.max(0,Math.min(255,parseInt(c.substring(4,6),16)+amt));return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');}
+
+    // APOLICES
+    async function loadApolices(){
+        const json=await api('/api/portal/apolices');if(!json||!json.success)return;const list=json.data||[];
+        document.getElementById('scApolices').textContent=list.filter(a=>a.status==='VIGENTE'||a.status==='ATIVA').length;
+        const hTb=document.getElementById('homeApolices'),tb=document.getElementById('apolicesTablePortal');hTb.innerHTML='';tb.innerHTML='';
+        list.forEach((a,i)=>{
+            tb.innerHTML+='<tr><td class="td-bold">'+(a.numero||'-')+'</td><td class="td-secondary">'+(a.tipoSeguro||'-')+'</td><td class="td-secondary">'+fmtDate(a.vigenciaInicio)+'</td><td class="td-secondary">'+fmtDate(a.vigenciaFim)+'</td><td class="td-bold">'+formatCurrency(a.premioTotal)+'</td><td>'+statusBadge(a.status)+'</td></tr>';
+            if(i<5)hTb.innerHTML+='<tr><td class="td-bold">'+(a.numero||'-')+'</td><td class="td-secondary">'+(a.tipoSeguro||'-')+'</td><td class="td-secondary">'+fmtDate(a.vigenciaInicio)+' — '+fmtDate(a.vigenciaFim)+'</td><td>'+statusBadge(a.status)+'</td></tr>';
+        });
+        if(!list.length){hTb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:24px">Nenhuma apólice.</td></tr>';tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:40px">Nenhuma apólice.</td></tr>'}
+    }
+
+    // PROPOSTAS
+    async function loadPropostas(){
+        const json=await api('/api/portal/propostas');if(!json||!json.success)return;const list=json.data||[];
+        const tb=document.getElementById('propostasTablePortal');tb.innerHTML='';
+        list.forEach(p=>{tb.innerHTML+='<tr><td class="td-bold">'+(p.numero||'-')+'</td><td class="td-secondary">'+(p.tipoSeguro||'-')+'</td><td class="td-secondary">'+fmtDate(p.dataInicioVigencia)+' — '+fmtDate(p.dataFimVigencia)+'</td><td class="td-bold">'+formatCurrency(p.valorPremio)+'</td><td>'+statusBadge(p.status)+'</td></tr>'});
+        if(!list.length)tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:40px">Nenhuma proposta.</td></tr>';
+    }
+
+    // SINISTROS
+    async function loadSinistros(){
+        const json=await api('/api/portal/sinistros');if(!json||!json.success)return;const list=json.data||[];
+        document.getElementById('scSinistros').textContent=list.filter(s=>s.status==='ABERTO'||s.status==='EM_ANALISE').length;
+        const tb=document.getElementById('sinistrosTablePortal');tb.innerHTML='';
+        list.forEach(s=>{tb.innerHTML+='<tr><td class="td-bold">'+(s.numeroSinistro||'-')+'</td><td class="td-secondary">'+(s.tipo||'-')+'</td><td class="td-secondary">'+fmtDate(s.dataOcorrencia)+'</td><td class="td-bold">'+formatCurrency(s.valorEstimado)+'</td><td>'+statusBadge(s.status)+'</td></tr>'});
+        if(!list.length)tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:40px">Nenhum sinistro.</td></tr>';
+    }
+
+    // BOLETOS
+    async function loadBoletos(){
+        const json=await api('/api/portal/boletos');if(!json||!json.success)return;const list=json.data||[];
+        document.getElementById('scBoletos').textContent=list.filter(b=>b.status==='PENDENTE'||b.status==='ABERTO'||b.status==='VENCIDO').length;
+        const hTb=document.getElementById('homeBoletos'),tb=document.getElementById('boletosTablePortal');hTb.innerHTML='';tb.innerHTML='';
+        list.forEach((b,i)=>{
+            const act=b.status!=='PAGO'?'<button class="btn btn-sm btn-secondary">2ª Via</button>':'-';
+            tb.innerHTML+='<tr><td class="td-secondary">'+(b.numeroParcela||'-')+'</td><td class="td-secondary">'+fmtDate(b.dataVencimento)+'</td><td class="td-bold">'+formatCurrency(b.valor)+'</td><td>'+statusBadge(b.status)+'</td><td>'+act+'</td></tr>';
+            if(i<5)hTb.innerHTML+='<tr><td class="td-secondary">'+fmtDate(b.dataVencimento)+'</td><td class="td-bold">'+formatCurrency(b.valor)+'</td><td>'+statusBadge(b.status)+'</td></tr>';
+        });
+        if(!list.length){hTb.innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:24px">Nenhum boleto.</td></tr>';tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:40px">Nenhum boleto.</td></tr>'}
+    }
+
+    // NOTIFICACOES
+    async function loadNotificacoes(){
+        const json=await api('/api/portal/notificacoes?size=100&sort=createdAt,desc');if(!json||!json.success)return;const list=json.data.content||json.data||[];
+        const unread=list.filter(n=>!n.lida).length;document.getElementById('scNotifs').textContent=unread;
+        const badge=document.getElementById('navNotifBadge'),dot=document.getElementById('notifDotPortal');
+        if(unread>0){badge.textContent=unread;badge.style.display='';dot.style.display=''}else{badge.style.display='none';dot.style.display='none'}
+        const container=document.getElementById('notificacoesBody');container.innerHTML='';
+        const icons={INFO:'ℹ️',WARNING:'⚠️',ERROR:'❌',SUCCESS:'✅'};const cls={INFO:'info',WARNING:'warning',ERROR:'error',SUCCESS:'success'};
+        list.forEach(n=>{container.innerHTML+='<div class="notif-item'+(n.lida?'':' unread')+'"><div class="notif-icon '+(cls[n.tipo]||'info')+'">'+(icons[n.tipo]||'ℹ️')+'</div><div class="notif-body"><div class="notif-title">'+(n.titulo||'')+'</div><div class="notif-msg">'+(n.mensagem||'')+'</div></div><div class="notif-time">'+fmtDateTime(n.createdAt)+'</div></div>'});
+        if(!list.length)container.innerHTML='<div style="text-align:center;padding:48px;color:var(--text-muted)"><svg viewBox="0 0 24 24" style="width:48px;height:48px;stroke:var(--text-muted);fill:none;stroke-width:1.5;margin-bottom:12px"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><p>Nenhuma notificação.</p></div>';
+    }
+
+    // ASSINATURAS
+    async function loadAssinaturas(){
+        const json=await api('/api/portal/assinaturas');if(!json||!json.success)return;const list=json.data||[];
+        const tb=document.getElementById('assinaturasTablePortal');tb.innerHTML='';
+        list.forEach(a=>{
+            const act=a.status==='PENDENTE'?'<button class="btn btn-sm btn-primary" onclick="assinarPortal(\''+a.id+'\')">Assinar</button>':'<span class="badge badge-green">Assinado</span>';
+            tb.innerHTML+='<tr><td class="td-bold">'+(a.entidadeTipo||'Documento')+'</td><td class="td-secondary">'+(a.entidadeTipo||'-')+'</td><td>'+statusBadge(a.status)+'</td><td class="td-secondary">'+(a.dataAssinatura?fmtDateTime(a.dataAssinatura):'-')+'</td><td>'+act+'</td></tr>';
+        });
+        if(!list.length)tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:40px">Nenhuma assinatura pendente.</td></tr>';
+    }
+    async function assinarPortal(id){if(!confirm('Confirma a assinatura digital deste documento?'))return;const json=await api('/api/tenant/assinaturas-digitais/'+id+'/assinar',{method:'PUT'});if(json&&json.success){alert('Documento assinado com sucesso!');loadAssinaturas();}}
+
+    // INIT
+    if(user.nome){document.getElementById('userName').textContent=user.nome;document.getElementById('userAvatar').textContent=user.nome.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();document.getElementById('welcomeName').textContent='Olá, '+user.nome.split(' ')[0]+'!'}
+    loadWhiteLabel();loadApolices();loadPropostas();loadSinistros();loadBoletos();loadNotificacoes();loadAssinaturas();
+    </script>
+</body>
+</html>

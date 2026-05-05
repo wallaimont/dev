@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Vida Seguros | Contato</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header class="subhero">
+    <nav class="navbar">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-icon"><i class="bi bi-shield-fill-check"></i></span>
+            Nova Vida Seguros
+        </a>
+        <div class="nav-links dark-links">
+            <a th:href="@{/}" th:classappend="${currentPage == 'home'} ? ' active' : ''">Início</a>
+            <a th:href="@{/seguros}" th:classappend="${currentPage == 'seguros'} ? ' active' : ''">Seguros</a>
+            <a th:href="@{/cotacao}" th:classappend="${currentPage == 'cotacao'} ? ' active' : ''">Cotação</a>
+            <a th:href="@{/contato}" th:classappend="${currentPage == 'contato'} ? ' active' : ''">Contato</a>
+        </div>
+    </nav>
+    <div class="page-hero-copy">
+        <span class="section-tag"><i class="bi bi-headset"></i> Atendimento consultivo</span>
+        <h1>Envie sua mensagem para o time comercial.</h1>
+        <p>Conte o contexto do cliente, da empresa ou do patrimônio e retornaremos com orientação especializada.</p>
+    </div>
+</header>
+
+<main>
+    <section class="section split-layout align-start">
+        <div class="panel-light contact-side">
+            <span class="section-tag"><i class="bi bi-telephone"></i> Nossos canais</span>
+            <h2>Atendimento ágil e humano</h2>
+
+            <div class="contact-channel">
+                <div class="channel-icon green"><i class="bi bi-envelope-fill"></i></div>
+                <div>
+                    <small>E-mail</small>
+                    <p>contato@novavidaseguros.com.br</p>
+                </div>
+            </div>
+            <div class="contact-channel">
+                <div class="channel-icon blue"><i class="bi bi-telephone-fill"></i></div>
+                <div>
+                    <small>Telefone</small>
+                    <p>(11) 4000-2026</p>
+                </div>
+            </div>
+            <div class="contact-channel">
+                <div class="channel-icon violet"><i class="bi bi-clock-fill"></i></div>
+                <div>
+                    <small>Horário</small>
+                    <p>Segunda a sexta, 8h às 18h</p>
+                </div>
+            </div>
+        </div>
+
+        <form class="contact-form" th:action="@{/contato}" th:object="${leadRequest}" method="post">
+            <div class="success-banner" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="error-banner" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+            <ul class="error-banner" th:if="${errorSummary != null and !#lists.isEmpty(errorSummary)}">
+                <li th:each="error : ${errorSummary}" th:text="${error}"></li>
+            </ul>
+
+            <div class="form-row">
+                <label>
+                    Nome
+                    <input type="text" th:field="*{nome}" placeholder="Seu nome completo" required>
+                    <span class="field-error" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
+                </label>
+                <label>
+                    E-mail
+                    <input type="email" th:field="*{email}" placeholder="voce@empresa.com" required>
+                    <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                </label>
+            </div>
+
+            <div class="form-row">
+                <label>
+                    Telefone
+                    <input type="text" th:field="*{telefone}" placeholder="(11) 99999-9999">
+                    <span class="field-error" th:if="${#fields.hasErrors('telefone')}" th:errors="*{telefone}"></span>
+                </label>
+                <label>
+                    Interesse principal
+                    <select th:field="*{tipoSeguro}">
+                        <option value="">Selecione</option>
+                        <option th:each="tipo : ${tiposSeguro}" th:value="${tipo}" th:text="${tipo}"></option>
+                    </select>
+                </label>
+            </div>
+
+            <label>
+                Mensagem
+                <textarea rows="5" th:field="*{mensagem}" placeholder="Descreva a necessidade do cliente ou empresa" required></textarea>
+                <span class="field-error" th:if="${#fields.hasErrors('mensagem')}" th:errors="*{mensagem}"></span>
+            </label>
+            <input type="hidden" th:field="*{origem}">
+            <input type="hidden" th:field="*{submissionToken}">
+            <button type="submit"><i class="bi bi-send"></i> Enviar mensagem</button>
+        </form>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/footer :: site-footer}"></footer>
+</body>
+</html>

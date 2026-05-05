@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — InsuranceFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+    :root {
+        --primary: #4F46E5;
+        --primary-dark: #3730A3;
+        --primary-light: #818CF8;
+        --primary-50: #EEF2FF;
+        --secondary: #0F172A;
+        --accent-green: #10B981;
+        --surface: #FFFFFF;
+        --surface-2: #F8FAFC;
+        --text: #0F172A;
+        --text-secondary: #64748B;
+        --text-muted: #94A3B8;
+        --border: #E2E8F0;
+        --radius: 16px;
+        --radius-sm: 10px;
+        --radius-xs: 6px;
+        --shadow: 0 4px 24px rgba(0,0,0,.08);
+        --shadow-lg: 0 12px 48px rgba(0,0,0,.12);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: var(--text);
+        background: var(--surface-2);
+        -webkit-font-smoothing: antialiased;
+        display: flex;
+    }
+
+    /* LEFT PANEL — Branding */
+    .login-brand {
+        width: 45%; min-height: 100vh;
+        background: linear-gradient(135deg, var(--primary) 0%, #7C3AED 60%, #06B6D4 100%);
+        display: flex; flex-direction: column; justify-content: center;
+        padding: 64px; position: relative; overflow: hidden;
+        color: #fff;
+    }
+    .login-brand::before {
+        content: ''; position: absolute; inset: 0;
+        background:
+            radial-gradient(circle at 20% 30%, rgba(255,255,255,.08), transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(255,255,255,.05), transparent 40%);
+    }
+    .login-brand::after {
+        content: ''; position: absolute; inset: 0;
+        background-image:
+            linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+        background-size: 48px 48px;
+        mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
+    }
+    .login-brand > * { position: relative; z-index: 1; }
+    .brand-logo {
+        display: flex; align-items: center; gap: 12px;
+        font-size: 28px; font-weight: 800; margin-bottom: 48px;
+    }
+    .brand-logo svg { width: 44px; height: 44px; }
+    .brand-title {
+        font-size: clamp(28px, 3vw, 40px); font-weight: 800;
+        line-height: 1.15; margin-bottom: 20px;
+        letter-spacing: -0.02em;
+    }
+    .brand-desc {
+        font-size: 17px; opacity: .8; line-height: 1.7;
+        max-width: 420px; margin-bottom: 48px;
+    }
+    .brand-features { display: flex; flex-direction: column; gap: 20px; }
+    .brand-feature {
+        display: flex; align-items: center; gap: 14px;
+        font-size: 15px; font-weight: 500;
+    }
+    .brand-feature-icon {
+        width: 40px; height: 40px; border-radius: 10px;
+        background: rgba(255,255,255,.12);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px; flex-shrink: 0;
+    }
+    .brand-stat {
+        display: flex; gap: 40px; margin-top: 56px;
+        padding-top: 32px; border-top: 1px solid rgba(255,255,255,.15);
+    }
+    .brand-stat-value { font-size: 28px; font-weight: 800; }
+    .brand-stat-label { font-size: 13px; opacity: .7; margin-top: 4px; }
+
+    /* RIGHT PANEL — Form */
+    .login-form-panel {
+        flex: 1; display: flex; align-items: center; justify-content: center;
+        padding: 48px;
+    }
+    .login-form-wrapper { width: 100%; max-width: 440px; }
+    .login-back {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 14px; font-weight: 500; color: var(--text-secondary);
+        margin-bottom: 40px; transition: color .2s;
+    }
+    .login-back:hover { color: var(--primary); }
+    .login-heading {
+        font-size: 32px; font-weight: 800; margin-bottom: 8px;
+        letter-spacing: -0.02em;
+    }
+    .login-sub {
+        font-size: 15px; color: var(--text-secondary);
+        margin-bottom: 36px; line-height: 1.5;
+    }
+    .login-sub a { color: var(--primary); font-weight: 600; }
+    .login-sub a:hover { text-decoration: underline; }
+
+    .form-group { margin-bottom: 24px; }
+    .form-group label {
+        display: block; font-size: 13px; font-weight: 600;
+        color: var(--text); margin-bottom: 8px;
+    }
+    .form-input-wrap { position: relative; }
+    .form-input-wrap input {
+        width: 100%; padding: 14px 16px;
+        border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+        font-size: 15px; font-family: inherit; color: var(--text);
+        transition: border-color .2s, box-shadow .2s;
+        background: var(--surface);
+    }
+    .form-input-wrap input:focus {
+        outline: none; border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(79,70,229,.08);
+    }
+    .form-input-wrap input.error {
+        border-color: #EF4444;
+        box-shadow: 0 0 0 4px rgba(239,68,68,.08);
+    }
+    .toggle-pw {
+        position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+        font-size: 18px; color: var(--text-muted); cursor: pointer;
+        user-select: none; padding: 4px;
+    }
+    .toggle-pw:hover { color: var(--text-secondary); }
+
+    .form-row-between {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 28px;
+    }
+    .form-remember {
+        display: flex; align-items: center; gap: 8px;
+        font-size: 13px; color: var(--text-secondary); cursor: pointer;
+    }
+    .form-remember input[type="checkbox"] {
+        width: 16px; height: 16px; accent-color: var(--primary);
+    }
+    .form-forgot { font-size: 13px; color: var(--primary); font-weight: 600; }
+    .form-forgot:hover { text-decoration: underline; }
+
+    .login-btn {
+        width: 100%; padding: 16px; border: none; border-radius: var(--radius-sm);
+        background: var(--primary); color: #fff;
+        font-size: 15px; font-weight: 700; font-family: inherit;
+        cursor: pointer; transition: all .25s;
+        box-shadow: 0 2px 12px rgba(79,70,229,.3);
+    }
+    .login-btn:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(79,70,229,.35); }
+    .login-btn:disabled { opacity: .6; cursor: wait; transform: none; }
+
+    .login-error {
+        display: none; margin-top: 16px;
+        padding: 14px 16px; border-radius: var(--radius-xs);
+        background: #FEF2F2; border: 1px solid #FECACA;
+        color: #DC2626; font-size: 14px; font-weight: 500;
+    }
+    .login-error.show { display: flex; align-items: center; gap: 8px; }
+
+    .login-divider {
+        display: flex; align-items: center; gap: 16px;
+        margin: 32px 0;
+        font-size: 13px; color: var(--text-muted); font-weight: 500;
+    }
+    .login-divider::before, .login-divider::after {
+        content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .demo-btn {
+        padding: 14px 16px; border-radius: var(--radius-sm);
+        border: 1.5px solid var(--border); background: var(--surface);
+        cursor: pointer; transition: all .2s; text-align: left;
+    }
+    .demo-btn:hover { border-color: var(--primary-light); background: var(--primary-50); }
+    .demo-btn-role {
+        font-size: 12px; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .5px; margin-bottom: 4px;
+    }
+    .demo-btn-role.role-master { color: var(--primary); }
+    .demo-btn-role.role-admin { color: #0891B2; }
+    .demo-btn-role.role-client { color: #059669; }
+    .demo-btn-email { font-size: 12px; color: var(--text-muted); word-break: break-all; }
+
+    .login-footer {
+        margin-top: 40px; text-align: center;
+        font-size: 12px; color: var(--text-muted);
+    }
+    .login-footer a { color: var(--text-secondary); font-weight: 500; }
+
+    /* LOADING SPINNER */
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; vertical-align: middle; margin-right: 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* RESPONSIVE */
+    @media (max-width: 960px) {
+        .login-brand { display: none; }
+        .login-form-panel { padding: 32px 24px; }
+    }
+    </style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<div class="login-brand">
+    <div class="brand-logo">
+        <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="10" fill="rgba(255,255,255,.2)"/><path d="M10 18l5 5 11-11" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        InsuranceFlow
+    </div>
+    <h1 class="brand-title">Gerencie sua operação de seguros em um só lugar</h1>
+    <p class="brand-desc">Propostas, apólices, sinistros, financeiro e portal do cliente. Tudo integrado em uma plataforma multi-empresa com sua marca.</p>
+    <div class="brand-features">
+        <div class="brand-feature">
+            <div class="brand-feature-icon">&#128737;</div>
+            <span>Gestão completa de apólices e sinistros</span>
+        </div>
+        <div class="brand-feature">
+            <div class="brand-feature-icon">&#128176;</div>
+            <span>Financeiro integrado com comissões automáticas</span>
+        </div>
+        <div class="brand-feature">
+            <div class="brand-feature-icon">&#127912;</div>
+            <span>White label — sua marca, suas cores</span>
+        </div>
+        <div class="brand-feature">
+            <div class="brand-feature-icon">&#128100;</div>
+            <span>Portal do cliente com auto-atendimento</span>
+        </div>
+    </div>
+    <div class="brand-stat">
+        <div>
+            <div class="brand-stat-value">850+</div>
+            <div class="brand-stat-label">Empresas</div>
+        </div>
+        <div>
+            <div class="brand-stat-value">47K+</div>
+            <div class="brand-stat-label">Apólices</div>
+        </div>
+        <div>
+            <div class="brand-stat-value">99.9%</div>
+            <div class="brand-stat-label">Uptime</div>
+        </div>
+    </div>
+</div>
+
+<!-- RIGHT PANEL — Form -->
+<div class="login-form-panel">
+    <div class="login-form-wrapper">
+        <a href="/" class="login-back">&larr; Voltar ao site</a>
+        <h2 class="login-heading">Bem-vindo de volta</h2>
+        <p class="login-sub">Não tem conta? <a href="/onboarding">Crie sua conta grátis</a></p>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <div class="form-input-wrap">
+                    <input type="email" id="email" required placeholder="seu@email.com" autocomplete="email" maxlength="200">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="senha">Senha</label>
+                <div class="form-input-wrap">
+                    <input type="password" id="senha" required placeholder="Digite sua senha" autocomplete="current-password" maxlength="200">
+                    <span class="toggle-pw" onclick="togglePassword()">&#128065;</span>
+                </div>
+            </div>
+            <div class="form-row-between">
+                <label class="form-remember">
+                    <input type="checkbox" id="remember"> Lembrar de mim
+                </label>
+                <a href="#" class="form-forgot">Esqueci minha senha</a>
+            </div>
+            <button type="submit" class="login-btn" id="loginBtn">Entrar</button>
+            <div class="login-error" id="loginError"></div>
+        </form>
+
+        <div class="login-divider">Acesso rápido para demonstração</div>
+
+        <div class="demo-grid">
+            <button class="demo-btn" onclick="demoLogin('admin@insuranceflow.com.br','admin123')">
+                <div class="demo-btn-role role-master">&#128081; Admin Master</div>
+                <div class="demo-btn-email">admin@insuranceflow.com.br</div>
+            </button>
+            <button class="demo-btn" onclick="demoLogin('carlos@seguramais.com.br','demo123')">
+                <div class="demo-btn-role role-admin">&#127970; Admin Empresa</div>
+                <div class="demo-btn-email">carlos@seguramais.com.br</div>
+            </button>
+            <button class="demo-btn" onclick="demoLogin('maria@email.com','demo123')">
+                <div class="demo-btn-role role-client">&#128100; Cliente</div>
+                <div class="demo-btn-email">maria@email.com</div>
+            </button>
+        </div>
+
+        <div class="login-footer">
+            <p>&copy; 2025 InsuranceFlow &bull; <a href="#">Termos</a> &bull; <a href="#">Privacidade</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword() {
+    var input = document.getElementById('senha');
+    input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+function demoLogin(email, senha) {
+    document.getElementById('email').value = email;
+    document.getElementById('senha').value = senha;
+    handleLogin(new Event('submit', { cancelable: true }));
+}
+
+function handleLogin(e) {
+    e.preventDefault();
+    var btn = document.getElementById('loginBtn');
+    var errorEl = document.getElementById('loginError');
+    errorEl.classList.remove('show');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Entrando...';
+
+    var email = document.getElementById('email').value;
+    var senha = document.getElementById('senha').value;
+
+    fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, senha: senha })
+    })
+    .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+    .then(function(result) {
+        if (!result.ok) {
+            throw new Error(result.data.message || 'Credenciais inválidas');
+        }
+        var json = result.data;
+        var token = json.data ? json.data.token : json.token;
+        if (!token) throw new Error('Token não recebido');
+
+        localStorage.setItem('token', token);
+
+        // Decode JWT payload to get role
+        var payload = JSON.parse(atob(token.split('.')[1]));
+        var role = payload.role || payload.roles || '';
+
+        if (role === 'ADMIN_MASTER' || role === 'ROLE_ADMIN_MASTER') {
+            window.location.href = '/master';
+        } else if (role === 'CLIENTE' || role === 'ROLE_CLIENTE') {
+            window.location.href = '/portal';
+        } else {
+            window.location.href = '/admin';
+        }
+    })
+    .catch(function(err) {
+        errorEl.textContent = '&#10060; ' + (err.message || 'Erro ao fazer login. Tente novamente.');
+        errorEl.innerHTML = '&#10060; ' + (err.message || 'Erro ao fazer login. Tente novamente.');
+        errorEl.classList.add('show');
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+    });
+}
+</script>
+</body>
+</html>

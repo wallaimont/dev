@@ -1,0 +1,276 @@
+# ============================================================
+# NEXUS MARKETPLACE — Application Configuration
+# ============================================================
+spring:
+  application:
+    name: nexus-marketplace
+
+  # Database
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/nexus}
+    username: ${SPRING_DATASOURCE_USERNAME:nexus}
+    password: ${SPRING_DATASOURCE_PASSWORD:nexus123}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: NexusHikariPool
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+
+  # JPA / Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: false
+        jdbc:
+          batch_size: 50
+          order_inserts: true
+          order_updates: true
+        cache:
+          use_second_level_cache: false
+
+  # Flyway
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+    validate-on-migrate: true
+    out-of-order: false
+
+  # Redis
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:redis123}
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+
+  # Kafka
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP:nexus-main}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      properties:
+        spring.json.trusted.packages: "com.nexus.*"
+    listener:
+      ack-mode: MANUAL_IMMEDIATE
+      concurrency: 3
+
+  # Mail
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+    username: ${SMTP_USER:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          timeout: 5000
+          connectiontimeout: 5000
+
+  # WebSocket
+  websocket:
+    message-broker:
+      relay-host: localhost
+      relay-port: 61613
+
+  # Jackson
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      write-durations-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+    default-property-inclusion: non_null
+    time-zone: America/Sao_Paulo
+
+  # Servlet
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+
+# Server
+server:
+  port: 8080
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain
+    min-response-size: 1024
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# OpenAPI / Swagger
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+    display-request-duration: true
+  info:
+    title: Nexus Marketplace API
+    version: 1.0.0
+    description: Enterprise Multi-tenant Marketplace Platform
+
+# ============================================================
+# NEXUS Custom Properties
+# ============================================================
+nexus:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:nexus-super-secret-dev-key-min-32-chars-here}
+      access-token-ttl-ms: ${JWT_ACCESS_TTL_MS:900000}
+      refresh-token-ttl-ms: ${JWT_REFRESH_TTL_MS:2592000000}
+
+  storage:
+    provider: ${STORAGE_PROVIDER:local}   # local | s3
+    local-path: ${STORAGE_LOCAL_PATH:/tmp/nexus-uploads}
+    s3:
+      endpoint: ${S3_ENDPOINT:}
+      bucket: ${S3_BUCKET:nexus-marketplace}
+      access-key: ${S3_ACCESS_KEY:}
+      secret-key: ${S3_SECRET_KEY:}
+      region: ${S3_REGION:us-east-1}
+
+  payment:
+    pagarme:
+      api-key: ${PAGARME_API_KEY:}
+      encryption-key: ${PAGARME_ENCRYPTION_KEY:}
+      webhook-secret: ${PAGARME_WEBHOOK_SECRET:}
+      base-url: https://api.pagar.me/core/v5
+    gerencianet:
+      client-id: ${GERENCIANET_CLIENT_ID:}
+      client-secret: ${GERENCIANET_CLIENT_SECRET:}
+      pix-key: ${GERENCIANET_PIX_KEY:}
+      environment: ${GERENCIANET_ENV:sandbox}
+
+  shipping:
+    melhor-envio:
+      token: ${MELHOR_ENVIO_TOKEN:}
+      environment: ${MELHOR_ENVIO_ENV:sandbox}
+
+  outbox:
+    batch-size: 100
+    polling-interval-ms: 5000
+    max-retries: 5
+
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+
+  mail:
+    from: ${MAIL_FROM:Nexus Marketplace <noreply@nexus.com.br>}
+
+---
+# ============================================================
+# DEV Profile
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  jpa:
+    show-sql: true
+
+  mail:
+    host: localhost
+    port: 1025
+
+logging:
+  level:
+    com.nexus: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
+
+nexus:
+  payment:
+    gerencianet:
+      environment: sandbox
+
+---
+# ============================================================
+# STAGING Profile
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: staging
+
+logging:
+  level:
+    com.nexus: INFO
+    root: WARN
+
+---
+# ============================================================
+# PROD Profile
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  jpa:
+    show-sql: false
+
+logging:
+  level:
+    com.nexus: INFO
+    root: WARN
+  pattern:
+    console: '{"timestamp":"%d{ISO8601}","level":"%level","logger":"%logger{36}","message":"%msg","thread":"%thread"}%n'

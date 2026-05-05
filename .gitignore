@@ -1,0 +1,63 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+.pytest_cache/
+
+# Node
+node_modules/
+.next/
+.nuxt/
+dist/
+build/
+.cache/
+
+# Android / Gradle
+.gradle/
+build/
+local.properties
+*.jks
+*.keystore
+
+# Maven / Java build output
+**/target/
+*.jar
+*.war
+*.class
+
+# Logs e temp
+*.log
+*.tmp
+*.bak
+npm-debug.log*
+yarn-error.log*
+
+# Ambientes e segredos
+.env
+.env.*
+!.env.example
+*.env
+
+# IDEs
+.vscode/settings.json
+.idea/
+*.suo
+*.user
+
+# Docker
+*.override.yml
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Playwright
+.playwright-mcp/
+
+# Playwright test outputs
+test-results/
+playwright-report/

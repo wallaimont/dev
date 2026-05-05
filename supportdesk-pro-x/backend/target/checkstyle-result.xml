@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="9.3">
+<file name="C:\Users\wallace\Desktop\Nova pasta (3)\supportdesk-pro-x\backend\src\main\java\com\supportdesk\config\AdminBootstrapInitializer.java">
+</file>
+<file name="C:\Users\wallace\Desktop\Nova pasta (3)\supportdesk-pro-x\backend\src\main\java\com\supportdesk\config\AppProperties.java">
+</file>
+<file name="C:\Users\wallace\Desktop\Nova pasta (3)\supportdesk-pro-x\backend\src\main\java\com\supportdesk\repository\UserRepository.java">
+</file>
+<file name="C:\Users\wallace\Desktop\Nova pasta (3)\supportdesk-pro-x\backend\src\main\java\com\supportdesk\security\SecurityConfig.java">
+</file>
+</checkstyle>

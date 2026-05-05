@@ -1,0 +1,154 @@
+spring:
+  application:
+    name: InsuranceFlow SaaS
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:demo-key}
+      chat:
+        options:
+          model: ${OPENAI_MODEL:gpt-4o-mini}
+  
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:${PGHOST:localhost}}:${DB_PORT:${PGPORT:5432}}/${DB_NAME:${PGDATABASE:insuranceflow}}
+    username: ${DB_USER:${PGUSER:insuranceflow}}
+    password: ${DB_PASS:${PGPASSWORD:insuranceflow2025}}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+  
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+  
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: false
+  
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USER:}
+    password: ${MAIL_PASS:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+  
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+    time-zone: UTC
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:c2VndXJvcy1zYWFzLXBsYXRhZm9ybWEtaW5zdXJhbmNlZmxvdy1zZWNyZXQta2V5LTIwMjUtcHJvZHVjdGlvbi1yZWFkeQ==}
+    expiration-ms: 3600000
+    refresh-expiration-ms: 604800000
+  
+  platform:
+    name: InsuranceFlow
+    url: ${PLATFORM_URL:http://localhost:8080}
+    support-email: suporte@insuranceflow.com.br
+    trial-days: 14
+  
+  billing:
+    gateway-ativo: ${BILLING_GATEWAY:MANUAL}
+    inadimplencia:
+      dias-atraso: 5
+      dias-bloqueio: 15
+    stripe:
+      api-key: ${STRIPE_API_KEY:}
+      webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+    asaas:
+      api-key: ${ASAAS_API_KEY:}
+      sandbox: ${ASAAS_SANDBOX:true}
+    mercadopago:
+      access-token: ${MERCADOPAGO_ACCESS_TOKEN:}
+    efi:
+      client-id: ${EFI_CLIENT_ID:}
+      client-secret: ${EFI_CLIENT_SECRET:}
+      sandbox: ${EFI_SANDBOX:true}
+  
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:3000,http://localhost:8080}
+
+  security:
+    swagger-enabled: ${SWAGGER_ENABLED:true}
+    rate-limit:
+      requests-per-minute: ${RATE_LIMIT_RPM:60}
+      login-requests-per-minute: ${RATE_LIMIT_LOGIN_RPM:10}
+    lockout:
+      max-attempts: ${LOCKOUT_MAX_ATTEMPTS:5}
+      lock-duration-minutes: ${LOCKOUT_DURATION_MINUTES:30}
+    password:
+      min-length: ${PASSWORD_MIN_LENGTH:10}
+
+  ai:
+    rate-limit:
+      default-rpm: ${AI_RATE_LIMIT_DEFAULT_RPM:20}
+      advanced-rpm: ${AI_RATE_LIMIT_ADVANCED_RPM:60}
+      premium-rpm: ${AI_RATE_LIMIT_PREMIUM_RPM:120}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
+server:
+  port: ${PORT:8080}
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+    include-exception: false
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        secure: ${SERVER_COOKIE_SECURE:false}
+        same-site: strict
+  tomcat:
+    max-http-form-post-size: 2MB
+    max-swallow-size: 2MB
+
+logging:
+  level:
+    com.insuranceflow: ${LOG_LEVEL:DEBUG}
+    org.springframework.security: INFO
+    org.hibernate.SQL: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{tenantId:-SYSTEM}] %logger{36} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+  health:
+    mail:
+      enabled: ${MANAGEMENT_HEALTH_MAIL_ENABLED:false}

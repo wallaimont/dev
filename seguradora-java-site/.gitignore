@@ -1,0 +1,35 @@
+# Build
+target/
+build/
+*.class
+*.jar
+.gradle/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Data (H2 database files)
+data/
+
+# Run directory
+run/
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# SQL Server local setup scripts (contain passwords)
+sqlserver/
+
+# Environment / secrets
+.env

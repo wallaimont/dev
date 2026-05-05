@@ -1,0 +1,2 @@
+-- Dados opcionais podem ser incluídos aqui.
+-- O usuário admin demo e dados iniciais são criados pela classe DataSeeder.

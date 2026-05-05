@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
+
+# Training outputs
+model-output/
+
+# Editor
+.vscode/
+.idea/

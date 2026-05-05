@@ -1,0 +1,6 @@
+com\supportdesk\controller\TicketControllerPermissionTest$MethodSecurityTestConfig.class
+com\supportdesk\service\RefreshTokenServiceTest.class
+com\supportdesk\security\JwtTokenProviderTest.class
+com\supportdesk\service\TicketServiceTest.class
+com\supportdesk\controller\TicketControllerPermissionTest.class
+com\supportdesk\service\AuthServiceTest.class

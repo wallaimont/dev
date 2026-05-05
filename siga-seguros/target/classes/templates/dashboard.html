@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+<div class="main-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div class="main-content">
+        <div th:replace="~{fragments/layout :: topbar}"></div>
+        <div class="content-area">
+
+            <!-- Welcome Banner -->
+            <div class="card mb-4" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #06b6d4 100%); border:none;">
+                <div class="card-body" style="padding:28px 32px; color:white;">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h2 style="font-weight:800; font-size:22px; margin-bottom:6px;">Bem-vindo ao SIGA Seguros</h2>
+                            <p style="opacity:0.8; margin:0; font-size:14px;" id="welcomeMsg">Confira o resumo do seu dia</p>
+                        </div>
+                        <div class="col-auto d-none d-md-block">
+                            <i class="bi bi-shield-check" style="font-size:56px; opacity:0.2;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stat Cards -->
+            <div class="row g-3 mb-4" id="statCards">
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="bi bi-people-fill"></i></div>
+                        <div class="stat-info"><h3 id="totalClientes">-</h3><p>Clientes</p></div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon teal"><i class="bi bi-file-earmark-text-fill"></i></div>
+                        <div class="stat-info"><h3 id="propostasAberto">-</h3><p>Propostas em Aberto</p></div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="bi bi-file-earmark-check-fill"></i></div>
+                        <div class="stat-info"><h3 id="apolicesAtivas">-</h3><p>Ap&#243;lices Ativas</p></div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><i class="bi bi-clock-history"></i></div>
+                        <div class="stat-info"><h3 id="apolicesVencendo">-</h3><p>Vencendo em 30 dias</p></div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon red"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                        <div class="stat-info"><h3 id="sinistrosAbertos">-</h3><p>Sinistros Abertos</p></div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="bi bi-arrow-down-circle-fill"></i></div>
+                        <div class="stat-info"><h3 id="contasReceber">-</h3><p>Contas a Receber</p></div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon red"><i class="bi bi-arrow-up-circle-fill"></i></div>
+                        <div class="stat-info"><h3 id="contasPagar">-</h3><p>Contas a Pagar</p></div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><i class="bi bi-pie-chart-fill"></i></div>
+                        <div class="stat-info"><h3 id="comissoesMes">-</h3><p>Comiss&#245;es do M&#234;s</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="row g-3 mb-4">
+                <div class="col-lg-6">
+                    <div class="chart-card card">
+                        <div class="card-header"><i class="bi bi-pie-chart-fill me-2"></i>Propostas por Status</div>
+                        <div class="card-body"><canvas id="chartPropostas" height="280"></canvas></div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="chart-card card">
+                        <div class="card-header"><i class="bi bi-bar-chart-fill me-2"></i>Ap&#243;lices por Seguradora</div>
+                        <div class="card-body"><canvas id="chartApolices" height="280"></canvas></div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="chart-card card">
+                        <div class="card-header"><i class="bi bi-graph-up me-2"></i>Faturamento Mensal</div>
+                        <div class="card-body"><canvas id="chartFaturamento" height="280"></canvas></div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="chart-card card">
+                        <div class="card-header"><i class="bi bi-cash-stack me-2"></i>Comiss&#245;es Mensais</div>
+                        <div class="card-body"><canvas id="chartComissoes" height="280"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Tables -->
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header"><i class="bi bi-clock me-2"></i>&#218;ltimas Propostas</div>
+                        <div class="card-body p-0">
+                            <table class="table mb-0">
+                                <thead><tr><th>N&#186;</th><th>Cliente</th><th>Seguradora</th><th>Status</th></tr></thead>
+                                <tbody id="tblUltimasPropostas">
+                                    <tr><td colspan="4" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Carregando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header"><i class="bi bi-calendar-event me-2"></i>Ap&#243;lices Vencendo</div>
+                        <div class="card-body p-0">
+                            <table class="table mb-0">
+                                <thead><tr><th>N&#186;</th><th>Cliente</th><th>Vencimento</th><th>Status</th></tr></thead>
+                                <tbody id="tblApolicesVencendo">
+                                    <tr><td colspan="4" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Carregando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: toasts}"></div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+
+<script>
+const CHART_COLORS = ['#4f46e5','#10b981','#f59e0b','#ef4444','#06b6d4','#7c3aed','#ec4899','#84cc16'];
+const CHART_DEFAULTS = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle', font: { size: 12, family: 'Inter' } } }
+    }
+};
+
+async function loadDashboard() {
+    try {
+        const res = await API.get('/dashboard');
+        const d = res.data;
+
+        // Welcome message
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const hora = new Date().getHours();
+        const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
+        document.getElementById('welcomeMsg').textContent = saudacao + (user.nome ? ', ' + user.nome.split(' ')[0] : '') + '! Confira o resumo do seu dia.';
+
+        // Stat cards with count animation
+        animateValue('totalClientes', d.totalClientes);
+        animateValue('propostasAberto', d.propostasEmAberto);
+        animateValue('apolicesAtivas', d.apolicesAtivas);
+        animateValue('apolicesVencendo', d.apolicesVencendo30Dias);
+        animateValue('sinistrosAbertos', d.sinistrosAbertos);
+        document.getElementById('contasReceber').textContent = formatCurrency(d.contasReceberPendentes);
+        document.getElementById('contasPagar').textContent = formatCurrency(d.contasPagarPendentes);
+        document.getElementById('comissoesMes').textContent = formatCurrency(d.comissoesMes);
+
+        // Chart: Propostas por Status
+        if (d.propostasPorStatus) {
+            new Chart(document.getElementById('chartPropostas'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(d.propostasPorStatus).map(s => s.replace(/_/g, ' ')),
+                    datasets: [{ data: Object.values(d.propostasPorStatus), backgroundColor: CHART_COLORS, borderWidth: 0, hoverOffset: 8 }]
+                },
+                options: { ...CHART_DEFAULTS, cutout: '65%' }
+            });
+        }
+
+        // Chart: Apolices por Seguradora
+        if (d.apolicesPorSeguradora) {
+            new Chart(document.getElementById('chartApolices'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(d.apolicesPorSeguradora),
+                    datasets: [{
+                        label: 'Ap\u00f3lices',
+                        data: Object.values(d.apolicesPorSeguradora),
+                        backgroundColor: 'rgba(79, 70, 229, 0.8)',
+                        borderRadius: 8, borderSkipped: false, barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    ...CHART_DEFAULTS,
+                    plugins: { ...CHART_DEFAULTS.plugins, legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 11, family: 'Inter' } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 11, family: 'Inter' } } }
+                    }
+                }
+            });
+        }
+
+        // Chart: Faturamento Mensal
+        if (d.faturamentoPorMes) {
+            const ctx = document.getElementById('chartFaturamento').getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+            gradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
+            gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Object.keys(d.faturamentoPorMes),
+                    datasets: [{
+                        label: 'Faturamento', data: Object.values(d.faturamentoPorMes),
+                        borderColor: '#10b981', backgroundColor: gradient,
+                        fill: true, tension: 0.4, pointRadius: 4, pointHoverRadius: 7,
+                        pointBackgroundColor: '#10b981', pointBorderColor: '#fff', pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    ...CHART_DEFAULTS,
+                    plugins: { ...CHART_DEFAULTS.plugins, legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 11, family: 'Inter' } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 11, family: 'Inter' } } }
+                    }
+                }
+            });
+        }
+
+        // Chart: Comissoes Mensais
+        if (d.comissoesPorMes) {
+            new Chart(document.getElementById('chartComissoes'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(d.comissoesPorMes),
+                    datasets: [{
+                        label: 'Comiss\u00f5es', data: Object.values(d.comissoesPorMes),
+                        backgroundColor: 'rgba(124, 58, 237, 0.8)',
+                        borderRadius: 8, borderSkipped: false, barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    ...CHART_DEFAULTS,
+                    plugins: { ...CHART_DEFAULTS.plugins, legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 11, family: 'Inter' } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 11, family: 'Inter' } } }
+                    }
+                }
+            });
+        }
+
+        // Table: Ultimas Propostas
+        const tbP = document.getElementById('tblUltimasPropostas');
+        if (d.ultimasPropostas && d.ultimasPropostas.length > 0) {
+            tbP.innerHTML = d.ultimasPropostas.map(p => `<tr>
+                <td><strong>${p.numeroProposta}</strong></td><td>${p.clienteNome}</td><td>${p.seguradoraNome}</td><td>${statusBadge(p.status)}</td>
+            </tr>`).join('');
+        } else {
+            tbP.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>Nenhuma proposta</td></tr>';
+        }
+
+        // Table: Apolices Vencendo
+        const tbA = document.getElementById('tblApolicesVencendo');
+        if (d.apolicesVencendo && d.apolicesVencendo.length > 0) {
+            tbA.innerHTML = d.apolicesVencendo.map(a => `<tr>
+                <td><strong>${a.numeroApolice}</strong></td><td>${a.clienteNome}</td><td>${a.fimVigencia}</td><td>${statusBadge(a.status)}</td>
+            </tr>`).join('');
+        } else {
+            tbA.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4"><i class="bi bi-check-circle me-2"></i>Nenhuma ap\u00f3lice vencendo</td></tr>';
+        }
+    } catch (err) {
+        showToast('Erro ao carregar dashboard: ' + err.message, 'danger');
+    }
+}
+
+function animateValue(id, end) {
+    const el = document.getElementById(id);
+    if (!el || end == null) { if(el) el.textContent = end || '0'; return; }
+    const duration = 600;
+    const start = 0;
+    const range = end - start;
+    const startTime = performance.now();
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.round(start + range * eased);
+        if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+}
+
+document.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
+</body>
+</html>

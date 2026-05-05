@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Ap\u00f3lices')}"></head>
+<body>
+<div class="main-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div class="main-content">
+        <div th:replace="~{fragments/layout :: topbar}"></div>
+        <div class="content-area">
+            <div class="page-header">
+                <div><h1 class="page-title">Ap&#243;lices</h1><p class="page-subtitle">Gerenciamento de ap&#243;lices de seguro</p></div>
+                <button class="btn btn-primary" onclick="novaApolice()"><i class="bi bi-plus-lg me-1"></i>Nova Ap&#243;lice</button>
+            </div>
+            <div class="table-container">
+                <div class="table-toolbar">
+                    <div class="table-filters">
+                        <select class="form-select" id="fStatus" onchange="loadApolices()">
+                            <option value="">Todos os status</option>
+                            <option value="ATIVA">Ativa</option>
+                            <option value="VENCIDA">Vencida</option>
+                            <option value="CANCELADA">Cancelada</option>
+                            <option value="SUSPENSA">Suspensa</option>
+                        </select>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadApolices()"><i class="bi bi-search me-1"></i>Filtrar</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead><tr><th>N&#186;</th><th>Cliente</th><th>Seguradora</th><th>Vig&#234;ncia</th><th>Pr&#234;mio</th><th>Status</th><th width="130">A&#231;&#245;es</th></tr></thead>
+                        <tbody id="tblData"><tr><td colspan="7" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Carregando...</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="table-pagination" id="pagination"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: toasts}"></div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>
+async function loadApolices(page = 0) {
+    const params = new URLSearchParams({ page, size: 20 });
+    const status = document.getElementById('fStatus').value;
+    if (status) params.append('status', status);
+    try {
+        const res = await API.get('/apolices?' + params);
+        const data = res.data;
+        const tb = document.getElementById('tblData');
+        if (data.content.length === 0) {
+            tb.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>Nenhuma ap\u00f3lice encontrada</td></tr>';
+        } else {
+            tb.innerHTML = data.content.map(a => `<tr>
+                <td><strong>${a.numeroApolice}</strong></td>
+                <td>${a.clienteNome}</td>
+                <td>${a.seguradoraNome}</td>
+                <td>${formatDate(a.vigenciaInicial)} - ${formatDate(a.vigenciaFinal)}</td>
+                <td>${formatCurrency(a.premioTotal)}</td>
+                <td>${statusBadge(a.status)}</td>
+                <td>
+                    ${canEdit('apolices') ? `<button class="btn btn-icon btn-outline-primary btn-sm me-1" onclick="editarApolice(${a.id})" title="Editar"><i class="bi bi-pencil"></i></button>` : ''}
+                    ${canEdit('apolices') ? `<button class="btn btn-icon btn-outline-warning btn-sm me-1" onclick="alterarStatusApolice(${a.id})" title="Status"><i class="bi bi-arrow-repeat"></i></button>` : ''}
+                    ${canDelete('apolices') ? `<button class="btn btn-icon btn-outline-danger btn-sm" onclick="inativarApolice(${a.id})" title="Excluir"><i class="bi bi-trash"></i></button>` : ''}
+                </td>
+            </tr>`).join('');
+        }
+        document.getElementById('pagination').innerHTML = renderPagination(data, 'loadApolices');
+    } catch (err) { showToast(err.message, 'danger'); }
+}
+
+function formApolice(a = {}) {
+    return `<form id="formApolice"><div class="row g-3">
+        <div class="col-md-4"><label class="form-label">Proposta ID</label><input type="number" class="form-control" id="aPropostaId" value="${a.propostaId || ''}" required></div>
+        <div class="col-md-4"><label class="form-label">N&#186; Ap&#243;lice</label><input type="text" class="form-control" id="aNumero" value="${a.numeroApolice || ''}" required></div>
+        <div class="col-md-4"><label class="form-label">CI (Seguradora)</label><input type="text" class="form-control" id="aCI" value="${a.codigoCI || ''}"></div>
+        <div class="col-md-4"><label class="form-label">Vig&#234;ncia Inicial</label><input type="text" class="form-control" id="aVigIni" value="${a.vigenciaInicial || ''}" placeholder="dd/mm/aaaa"></div>
+        <div class="col-md-4"><label class="form-label">Vig&#234;ncia Final</label><input type="text" class="form-control" id="aVigFim" value="${a.vigenciaFinal || ''}" placeholder="dd/mm/aaaa"></div>
+        <div class="col-md-4"><label class="form-label">Pr&#234;mio Total</label><input type="number" step="0.01" class="form-control" id="aPremio" value="${a.premioTotal || ''}"></div>
+        <div class="col-md-4"><label class="form-label">Import&#226;ncia Segurada</label><input type="number" step="0.01" class="form-control" id="aIS" value="${a.importanciaSegurada || ''}"></div>
+        <div class="col-md-4"><label class="form-label">Franquia</label><input type="number" step="0.01" class="form-control" id="aFranquia" value="${a.franquia || ''}"></div>
+        <div class="col-md-4"><label class="form-label">% Comiss&#227;o</label><input type="number" step="0.01" class="form-control" id="aComissao" value="${a.percentualComissao || ''}"></div>
+        <div class="col-12"><label class="form-label">Observa&#231;&#245;es</label><textarea class="form-control" id="aObs" rows="2">${a.observacoes || ''}</textarea></div>
+    </div></form>`;
+}
+
+function getApoliceData() {
+    return {
+        propostaId: document.getElementById('aPropostaId').value,
+        numeroApolice: document.getElementById('aNumero').value,
+        codigoCI: document.getElementById('aCI').value,
+        vigenciaInicial: document.getElementById('aVigIni').value,
+        vigenciaFinal: document.getElementById('aVigFim').value,
+        premioTotal: document.getElementById('aPremio').value,
+        importanciaSegurada: document.getElementById('aIS').value,
+        franquia: document.getElementById('aFranquia').value,
+        percentualComissao: document.getElementById('aComissao').value,
+        observacoes: document.getElementById('aObs').value
+    };
+}
+
+function novaApolice() {
+    showModal('Nova Ap\u00f3lice', formApolice(), async () => {
+        await API.post('/apolices', getApoliceData());
+        showToast('Ap\u00f3lice criada com sucesso');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadApolices();
+    }, 'lg');
+}
+
+async function editarApolice(id) {
+    const res = await API.get('/apolices/' + id);
+    showModal('Editar Ap\u00f3lice', formApolice(res.data), async () => {
+        await API.put('/apolices/' + id, getApoliceData());
+        showToast('Ap\u00f3lice atualizada');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadApolices();
+    }, 'lg');
+}
+
+function alterarStatusApolice(id) {
+    showModal('Alterar Status', `<select class="form-select" id="novoStatus">
+        <option value="ATIVA">Ativa</option><option value="VENCIDA">Vencida</option>
+        <option value="CANCELADA">Cancelada</option><option value="SUSPENSA">Suspensa</option>
+    </select>`, async () => {
+        await API.patch('/apolices/' + id + '/status?status=' + document.getElementById('novoStatus').value);
+        showToast('Status alterado');
+        bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();
+        loadApolices();
+    });
+}
+
+async function inativarApolice(id) {
+    if (!confirm('Deseja inativar esta ap\u00f3lice?')) return;
+    await API.del('/apolices/' + id);
+    showToast('Ap\u00f3lice inativada');
+    loadApolices();
+}
+
+document.addEventListener('DOMContentLoaded', loadApolices);
+</script>
+</body>
+</html>

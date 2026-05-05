@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.orbyt.marketplace.fraud.application.FraudServiceIntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 6, Time elapsed: 0 s -- in com.orbyt.marketplace.fraud.application.FraudServiceIntegrationTest

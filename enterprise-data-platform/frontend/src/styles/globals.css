@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.3);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.3);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.5);
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-surface-800/50 backdrop-blur-xl border border-surface-700/50 rounded-2xl;
+  }
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300 hover:border-brand-500/30 hover:shadow-lg hover:shadow-brand-500/5;
+  }
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-400 to-blue-300 bg-clip-text text-transparent;
+  }
+  .btn-primary {
+    @apply px-6 py-2.5 bg-gradient-to-r from-brand-600 to-brand-500 text-white font-medium rounded-xl
+           hover:from-brand-500 hover:to-brand-400 transition-all duration-300
+           shadow-lg shadow-brand-600/25 hover:shadow-brand-500/40
+           active:scale-[0.98];
+  }
+  .btn-secondary {
+    @apply px-6 py-2.5 bg-surface-700/50 text-surface-200 font-medium rounded-xl border border-surface-600/50
+           hover:bg-surface-600/50 hover:text-white transition-all duration-300;
+  }
+  .input-field {
+    @apply w-full px-4 py-3 bg-surface-800/80 border border-surface-600/50 rounded-xl
+           text-white placeholder-surface-400
+           focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20
+           transition-all duration-300;
+  }
+  .badge-success {
+    @apply px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs font-medium rounded-full border border-emerald-500/30;
+  }
+  .badge-warning {
+    @apply px-2.5 py-0.5 bg-amber-500/20 text-amber-400 text-xs font-medium rounded-full border border-amber-500/30;
+  }
+  .badge-danger {
+    @apply px-2.5 py-0.5 bg-red-500/20 text-red-400 text-xs font-medium rounded-full border border-red-500/30;
+  }
+}

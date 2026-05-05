@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta — InsuranceFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+    :root {
+        --primary: #4F46E5;
+        --primary-dark: #3730A3;
+        --primary-light: #818CF8;
+        --primary-50: #EEF2FF;
+        --secondary: #0F172A;
+        --accent-green: #10B981;
+        --accent-cyan: #06B6D4;
+        --accent-amber: #F59E0B;
+        --surface: #FFFFFF;
+        --surface-2: #F8FAFC;
+        --surface-3: #F1F5F9;
+        --text: #0F172A;
+        --text-secondary: #64748B;
+        --text-muted: #94A3B8;
+        --border: #E2E8F0;
+        --error: #EF4444;
+        --radius: 16px;
+        --radius-sm: 10px;
+        --radius-xs: 6px;
+        --shadow: 0 4px 24px rgba(0,0,0,.08);
+        --shadow-lg: 0 12px 48px rgba(0,0,0,.12);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: var(--text);
+        background: var(--surface-2);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* LAYOUT */
+    .onb-wrapper {
+        min-height: 100vh; display: flex; flex-direction: column;
+    }
+
+    /* HEADER */
+    .onb-header {
+        padding: 20px 32px;
+        display: flex; align-items: center; justify-content: space-between;
+        background: var(--surface); border-bottom: 1px solid var(--border);
+    }
+    .onb-logo {
+        display: flex; align-items: center; gap: 10px;
+        font-size: 20px; font-weight: 800; color: var(--primary);
+    }
+    .onb-logo svg { width: 32px; height: 32px; }
+    .onb-header-link {
+        font-size: 14px; color: var(--text-secondary); font-weight: 500;
+    }
+    .onb-header-link a { color: var(--primary); font-weight: 600; }
+    .onb-header-link a:hover { text-decoration: underline; }
+
+    /* PROGRESS */
+    .onb-progress {
+        background: var(--surface); border-bottom: 1px solid var(--border);
+        padding: 24px 32px;
+    }
+    .onb-progress-inner { max-width: 640px; margin: 0 auto; }
+    .onb-steps {
+        display: flex; align-items: center; justify-content: space-between;
+        position: relative; margin-bottom: 16px;
+    }
+    .onb-steps::before {
+        content: ''; position: absolute; top: 18px; left: 24px; right: 24px;
+        height: 2px; background: var(--border);
+    }
+    .onb-progress-fill {
+        content: ''; position: absolute; top: 18px; left: 24px;
+        height: 2px; background: var(--primary);
+        transition: width .4s ease;
+    }
+    .onb-step {
+        display: flex; flex-direction: column; align-items: center;
+        gap: 8px; position: relative; z-index: 1;
+    }
+    .onb-step-num {
+        width: 36px; height: 36px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px; font-weight: 700;
+        background: var(--surface); border: 2px solid var(--border);
+        color: var(--text-muted); transition: all .3s;
+    }
+    .onb-step.active .onb-step-num { border-color: var(--primary); color: var(--primary); background: var(--primary-50); }
+    .onb-step.done .onb-step-num { border-color: var(--accent-green); background: var(--accent-green); color: #fff; }
+    .onb-step-label { font-size: 12px; font-weight: 600; color: var(--text-muted); transition: color .3s; }
+    .onb-step.active .onb-step-label { color: var(--primary); }
+    .onb-step.done .onb-step-label { color: var(--accent-green); }
+
+    /* BODY */
+    .onb-body { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 48px 24px 80px; }
+    .onb-card {
+        width: 100%; max-width: 640px;
+        background: var(--surface); border-radius: var(--radius);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow); padding: 48px;
+    }
+    .onb-card-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.02em; }
+    .onb-card-desc { font-size: 15px; color: var(--text-secondary); margin-bottom: 36px; line-height: 1.6; }
+
+    /* FORM */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { margin-bottom: 24px; }
+    .form-group label {
+        display: block; font-size: 13px; font-weight: 600;
+        color: var(--text); margin-bottom: 8px;
+    }
+    .form-group label .req { color: var(--error); }
+    .form-group input, .form-group select {
+        width: 100%; padding: 13px 16px;
+        border: 1.5px solid var(--border); border-radius: var(--radius-xs);
+        font-size: 14px; font-family: inherit; color: var(--text);
+        transition: border-color .2s, box-shadow .2s;
+        background: var(--surface);
+    }
+    .form-group input:focus, .form-group select:focus {
+        outline: none; border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(79,70,229,.08);
+    }
+    .form-group input.error { border-color: var(--error); }
+    .form-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+    .form-error { font-size: 12px; color: var(--error); margin-top: 6px; display: none; }
+    .form-error.show { display: block; }
+
+    /* PASSWORD STRENGTH */
+    .pw-strength { display: flex; gap: 4px; margin-top: 8px; }
+    .pw-bar { flex: 1; height: 4px; border-radius: 2px; background: var(--border); transition: background .3s; }
+    .pw-bar.weak { background: var(--error); }
+    .pw-bar.medium { background: var(--accent-amber); }
+    .pw-bar.strong { background: var(--accent-green); }
+
+    /* PLANS */
+    .plans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .plan-option {
+        padding: 24px; border-radius: var(--radius-sm);
+        border: 2px solid var(--border); cursor: pointer;
+        transition: all .2s; position: relative;
+    }
+    .plan-option:hover { border-color: var(--primary-light); }
+    .plan-option.selected { border-color: var(--primary); background: var(--primary-50); }
+    .plan-option.popular-plan::after {
+        content: 'Popular'; position: absolute; top: -10px; right: 16px;
+        background: var(--primary); color: #fff; padding: 3px 10px;
+        border-radius: 999px; font-size: 11px; font-weight: 700;
+    }
+    .plan-option-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .plan-option-price { font-size: 24px; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
+    .plan-option-price small { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+    .plan-option-items { list-style: none; margin-top: 12px; }
+    .plan-option-items li { font-size: 12px; color: var(--text-secondary); padding: 3px 0; }
+    .plan-option-items li::before { content: '✓ '; color: var(--accent-green); font-weight: 700; }
+    .plan-option input[type="radio"] { display: none; }
+
+    /* REVIEW */
+    .review-section { margin-bottom: 28px; }
+    .review-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+    .review-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .review-item { padding: 12px 16px; background: var(--surface-2); border-radius: var(--radius-xs); }
+    .review-item-label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+    .review-item-value { font-size: 14px; font-weight: 600; margin-top: 2px; }
+
+    /* BUTTONS */
+    .onb-actions {
+        display: flex; gap: 16px; margin-top: 32px;
+        padding-top: 24px; border-top: 1px solid var(--border);
+    }
+    .onb-btn {
+        flex: 1; padding: 16px; border-radius: var(--radius-sm);
+        font-size: 15px; font-weight: 700; font-family: inherit;
+        cursor: pointer; transition: all .25s; text-align: center;
+        border: none;
+    }
+    .onb-btn-primary {
+        background: var(--primary); color: #fff;
+        box-shadow: 0 2px 12px rgba(79,70,229,.3);
+    }
+    .onb-btn-primary:hover { background: var(--primary-dark); }
+    .onb-btn-primary:disabled { opacity: .6; cursor: wait; }
+    .onb-btn-secondary {
+        background: transparent; color: var(--text-secondary);
+        border: 1.5px solid var(--border);
+    }
+    .onb-btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* GLOBAL ERROR */
+    .onb-global-error {
+        display: none; margin-bottom: 24px;
+        padding: 14px 16px; border-radius: var(--radius-xs);
+        background: #FEF2F2; border: 1px solid #FECACA;
+        color: #DC2626; font-size: 14px; font-weight: 500;
+    }
+    .onb-global-error.show { display: block; }
+
+    /* SUCCESS */
+    .onb-success {
+        display: none; text-align: center; padding: 40px 20px;
+    }
+    .onb-success.show { display: flex; flex-direction: column; align-items: center; }
+    .onb-success-icon { font-size: 64px; margin-bottom: 24px; }
+    .onb-success h2 { font-size: 28px; font-weight: 800; margin-bottom: 12px; color: var(--accent-green); }
+    .onb-success p { font-size: 16px; color: var(--text-secondary); line-height: 1.6; max-width: 420px; margin-bottom: 32px; }
+    .onb-success .onb-btn { max-width: 280px; }
+
+    /* SPINNER */
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; vertical-align: middle; margin-right: 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* STEP VISIBILITY */
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+
+    /* RESPONSIVE */
+    @media (max-width: 640px) {
+        .onb-card { padding: 32px 24px; }
+        .form-row { grid-template-columns: 1fr; }
+        .plans-grid { grid-template-columns: 1fr; }
+        .review-grid { grid-template-columns: 1fr; }
+        .onb-step-label { display: none; }
+        .onb-header { padding: 16px 20px; }
+    }
+    </style>
+</head>
+<body>
+<div class="onb-wrapper">
+
+    <!-- HEADER -->
+    <div class="onb-header">
+        <a href="/" class="onb-logo">
+            <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="10" fill="#4F46E5"/><path d="M10 18l5 5 11-11" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            InsuranceFlow
+        </a>
+        <div class="onb-header-link">Já tem conta? <a href="/login">Entrar</a></div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="onb-progress">
+        <div class="onb-progress-inner">
+            <div class="onb-steps">
+                <div class="onb-progress-fill" id="progressFill" style="width: 0%"></div>
+                <div class="onb-step active" data-step="1">
+                    <div class="onb-step-num">1</div>
+                    <div class="onb-step-label">Plano</div>
+                </div>
+                <div class="onb-step" data-step="2">
+                    <div class="onb-step-num">2</div>
+                    <div class="onb-step-label">Empresa</div>
+                </div>
+                <div class="onb-step" data-step="3">
+                    <div class="onb-step-num">3</div>
+                    <div class="onb-step-label">Administrador</div>
+                </div>
+                <div class="onb-step" data-step="4">
+                    <div class="onb-step-num">4</div>
+                    <div class="onb-step-label">Revisão</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="onb-body">
+        <div class="onb-card">
+            <div class="onb-global-error" id="globalError"></div>
+
+            <!-- STEP 1 — Plan -->
+            <div class="step-panel active" id="step1">
+                <div class="onb-card-title">Escolha seu plano</div>
+                <div class="onb-card-desc">Todos os planos incluem 14 dias de teste grátis. Sem cartão de crédito.</div>
+                <div class="plans-grid" id="plansGrid">
+                    <label class="plan-option" data-plan="Starter">
+                        <input type="radio" name="plano" value="Starter">
+                        <div class="plan-option-name">Starter</div>
+                        <div class="plan-option-price">R$ 197 <small>/mês</small></div>
+                        <ul class="plan-option-items">
+                            <li>3 usuários</li>
+                            <li>100 clientes</li>
+                            <li>100 apólices</li>
+                        </ul>
+                    </label>
+                    <label class="plan-option" data-plan="Professional">
+                        <input type="radio" name="plano" value="Professional">
+                        <div class="plan-option-name">Professional</div>
+                        <div class="plan-option-price">R$ 497 <small>/mês</small></div>
+                        <ul class="plan-option-items">
+                            <li>10 usuários</li>
+                            <li>500 clientes</li>
+                            <li>Portal do cliente</li>
+                        </ul>
+                    </label>
+                    <label class="plan-option popular-plan" data-plan="Business">
+                        <input type="radio" name="plano" value="Business">
+                        <div class="plan-option-name">Business</div>
+                        <div class="plan-option-price">R$ 997 <small>/mês</small></div>
+                        <ul class="plan-option-items">
+                            <li>25 usuários</li>
+                            <li>2.000 clientes</li>
+                            <li>White label + API</li>
+                        </ul>
+                    </label>
+                    <label class="plan-option" data-plan="Enterprise">
+                        <input type="radio" name="plano" value="Enterprise">
+                        <div class="plan-option-name">Enterprise</div>
+                        <div class="plan-option-price">R$ 2.497 <small>/mês</small></div>
+                        <ul class="plan-option-items">
+                            <li>Ilimitado</li>
+                            <li>Suporte 24/7</li>
+                            <li>Implantação assistida</li>
+                        </ul>
+                    </label>
+                </div>
+                <div class="form-error" id="planError">Selecione um plano para continuar.</div>
+                <div class="onb-actions">
+                    <a href="/" class="onb-btn onb-btn-secondary" style="text-align:center;">Voltar ao site</a>
+                    <button type="button" class="onb-btn onb-btn-primary" onclick="nextStep(1)">Continuar &rarr;</button>
+                </div>
+            </div>
+
+            <!-- STEP 2 — Company -->
+            <div class="step-panel" id="step2">
+                <div class="onb-card-title">Dados da empresa</div>
+                <div class="onb-card-desc">Informe os dados da sua administradora de seguros.</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Razão Social <span class="req">*</span></label>
+                        <input type="text" id="razaoSocial" required placeholder="Razão social da empresa" maxlength="300">
+                    </div>
+                    <div class="form-group">
+                        <label>Nome Fantasia <span class="req">*</span></label>
+                        <input type="text" id="nomeFantasia" required placeholder="Nome fantasia" maxlength="300">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>CNPJ <span class="req">*</span></label>
+                        <input type="text" id="cnpj" required placeholder="00.000.000/0000-00" maxlength="18">
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone</label>
+                        <input type="tel" id="telefone" placeholder="(11) 99999-0000" maxlength="20">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Email da empresa <span class="req">*</span></label>
+                    <input type="email" id="emailEmpresa" required placeholder="contato@suaempresa.com.br" maxlength="200">
+                </div>
+                <div class="onb-actions">
+                    <button type="button" class="onb-btn onb-btn-secondary" onclick="prevStep(2)">&larr; Voltar</button>
+                    <button type="button" class="onb-btn onb-btn-primary" onclick="nextStep(2)">Continuar &rarr;</button>
+                </div>
+            </div>
+
+            <!-- STEP 3 — Admin -->
+            <div class="step-panel" id="step3">
+                <div class="onb-card-title">Conta do administrador</div>
+                <div class="onb-card-desc">Você será o administrador principal da empresa. Poderá convidar outros usuários depois.</div>
+                <div class="form-group">
+                    <label>Nome completo <span class="req">*</span></label>
+                    <input type="text" id="nomeAdmin" required placeholder="Seu nome completo" maxlength="200">
+                </div>
+                <div class="form-group">
+                    <label>Email de acesso <span class="req">*</span></label>
+                    <input type="email" id="emailAdmin" required placeholder="seu@email.com" maxlength="200">
+                    <div class="form-hint">Este será seu email de login na plataforma.</div>
+                </div>
+                <div class="form-group">
+                    <label>Senha <span class="req">*</span></label>
+                    <input type="password" id="senhaAdmin" required placeholder="Mínimo 6 caracteres" minlength="6" maxlength="200" oninput="checkPwStrength()">
+                    <div class="pw-strength">
+                        <div class="pw-bar" id="pw1"></div>
+                        <div class="pw-bar" id="pw2"></div>
+                        <div class="pw-bar" id="pw3"></div>
+                        <div class="pw-bar" id="pw4"></div>
+                    </div>
+                    <div class="form-hint">Use letras maiúsculas, minúsculas, números e símbolos.</div>
+                </div>
+                <div class="form-group">
+                    <label>Confirmar senha <span class="req">*</span></label>
+                    <input type="password" id="senhaConfirm" required placeholder="Repita a senha" maxlength="200">
+                    <div class="form-error" id="pwMatchError">As senhas não conferem.</div>
+                </div>
+                <div class="onb-actions">
+                    <button type="button" class="onb-btn onb-btn-secondary" onclick="prevStep(3)">&larr; Voltar</button>
+                    <button type="button" class="onb-btn onb-btn-primary" onclick="nextStep(3)">Continuar &rarr;</button>
+                </div>
+            </div>
+
+            <!-- STEP 4 — Review -->
+            <div class="step-panel" id="step4">
+                <div class="onb-card-title">Revisão final</div>
+                <div class="onb-card-desc">Confira os dados antes de criar sua conta. O período de teste de 14 dias começa agora.</div>
+
+                <div class="review-section">
+                    <div class="review-label">Plano selecionado</div>
+                    <div class="review-grid">
+                        <div class="review-item" style="grid-column:1/-1;">
+                            <div class="review-item-label">Plano</div>
+                            <div class="review-item-value" id="revPlano">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="review-section">
+                    <div class="review-label">Dados da empresa</div>
+                    <div class="review-grid">
+                        <div class="review-item">
+                            <div class="review-item-label">Razão Social</div>
+                            <div class="review-item-value" id="revRazao">—</div>
+                        </div>
+                        <div class="review-item">
+                            <div class="review-item-label">Nome Fantasia</div>
+                            <div class="review-item-value" id="revFantasia">—</div>
+                        </div>
+                        <div class="review-item">
+                            <div class="review-item-label">CNPJ</div>
+                            <div class="review-item-value" id="revCnpj">—</div>
+                        </div>
+                        <div class="review-item">
+                            <div class="review-item-label">Email</div>
+                            <div class="review-item-value" id="revEmailEmp">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="review-section">
+                    <div class="review-label">Administrador</div>
+                    <div class="review-grid">
+                        <div class="review-item">
+                            <div class="review-item-label">Nome</div>
+                            <div class="review-item-value" id="revNomeAdmin">—</div>
+                        </div>
+                        <div class="review-item">
+                            <div class="review-item-label">Email de acesso</div>
+                            <div class="review-item-value" id="revEmailAdmin">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding:16px;background:#ECFDF5;border-radius:var(--radius-xs);border:1px solid #A7F3D0;margin-top:8px;">
+                    <div style="font-size:14px;font-weight:600;color:#059669;">&#9989; Teste grátis por 14 dias</div>
+                    <div style="font-size:13px;color:#64748B;margin-top:4px;">Sem cartão de crédito. Acesso completo a todas as funcionalidades do plano.</div>
+                </div>
+
+                <div class="onb-actions">
+                    <button type="button" class="onb-btn onb-btn-secondary" onclick="prevStep(4)">&larr; Voltar</button>
+                    <button type="button" class="onb-btn onb-btn-primary" id="submitBtn" onclick="submitOnboarding()">Criar minha conta &rarr;</button>
+                </div>
+            </div>
+
+            <!-- SUCCESS -->
+            <div class="onb-success" id="successPanel">
+                <div class="onb-success-icon">&#127881;</div>
+                <h2>Conta criada com sucesso!</h2>
+                <p>Sua administradora está pronta. Faça login com o email e senha cadastrados para começar a usar o InsuranceFlow.</p>
+                <a href="/login" class="onb-btn onb-btn-primary" style="max-width:280px;display:block;">Fazer Login &rarr;</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+var currentStep = 1;
+var selectedPlan = '';
+
+/* Pre-select plan from URL */
+(function() {
+    var params = new URLSearchParams(window.location.search);
+    var plano = params.get('plano');
+    if (plano) {
+        var el = document.querySelector('[data-plan="' + plano + '"]');
+        if (el) { selectPlan(el); }
+    }
+})();
+
+/* Plan selection */
+document.querySelectorAll('.plan-option').forEach(function(el) {
+    el.addEventListener('click', function() { selectPlan(el); });
+});
+
+function selectPlan(el) {
+    document.querySelectorAll('.plan-option').forEach(function(p) { p.classList.remove('selected'); });
+    el.classList.add('selected');
+    el.querySelector('input[type="radio"]').checked = true;
+    selectedPlan = el.dataset.plan;
+    document.getElementById('planError').classList.remove('show');
+}
+
+/* CNPJ mask */
+document.getElementById('cnpj').addEventListener('input', function(e) {
+    var v = e.target.value.replace(/\D/g, '');
+    if (v.length > 14) v = v.substring(0, 14);
+    if (v.length > 12) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/, '$1.$2.$3/$4-$5');
+    else if (v.length > 8) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{1,4})/, '$1.$2.$3/$4');
+    else if (v.length > 5) v = v.replace(/^(\d{2})(\d{3})(\d{1,3})/, '$1.$2.$3');
+    else if (v.length > 2) v = v.replace(/^(\d{2})(\d{1,3})/, '$1.$2');
+    e.target.value = v;
+});
+
+/* Phone mask */
+document.getElementById('telefone').addEventListener('input', function(e) {
+    var v = e.target.value.replace(/\D/g, '');
+    if (v.length > 11) v = v.substring(0, 11);
+    if (v.length > 6) v = v.replace(/^(\d{2})(\d{4,5})(\d{1,4})/, '($1) $2-$3');
+    else if (v.length > 2) v = v.replace(/^(\d{2})(\d{1,5})/, '($1) $2');
+    e.target.value = v;
+});
+
+/* Password strength */
+function checkPwStrength() {
+    var pw = document.getElementById('senhaAdmin').value;
+    var score = 0;
+    if (pw.length >= 6) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    for (var i = 1; i <= 4; i++) {
+        var bar = document.getElementById('pw' + i);
+        bar.className = 'pw-bar';
+        if (i <= score) {
+            bar.classList.add(score <= 1 ? 'weak' : score <= 2 ? 'medium' : 'strong');
+        }
+    }
+}
+
+/* Step navigation */
+function updateProgress() {
+    var fill = ((currentStep - 1) / 3) * 100;
+    document.getElementById('progressFill').style.width = 'calc(' + fill + '% - ' + (fill > 0 ? '0px' : '0px') + ')';
+    document.querySelectorAll('.onb-step').forEach(function(el) {
+        var s = parseInt(el.dataset.step);
+        el.classList.remove('active', 'done');
+        if (s === currentStep) el.classList.add('active');
+        else if (s < currentStep) el.classList.add('done');
+    });
+    document.querySelectorAll('.step-panel').forEach(function(p) { p.classList.remove('active'); });
+    var stepEl = document.getElementById('step' + currentStep);
+    if (stepEl) stepEl.classList.add('active');
+}
+
+function nextStep(from) {
+    hideGlobalError();
+    if (from === 1) {
+        if (!selectedPlan) {
+            document.getElementById('planError').classList.add('show');
+            return;
+        }
+    }
+    if (from === 2) {
+        var rs = document.getElementById('razaoSocial');
+        var nf = document.getElementById('nomeFantasia');
+        var cnpj = document.getElementById('cnpj');
+        var eEmp = document.getElementById('emailEmpresa');
+        if (!rs.value.trim() || !nf.value.trim() || !cnpj.value.trim() || !eEmp.value.trim()) {
+            showGlobalError('Preencha todos os campos obrigatórios.');
+            return;
+        }
+        var cnpjDigits = cnpj.value.replace(/\D/g, '');
+        if (cnpjDigits.length !== 14) {
+            showGlobalError('CNPJ deve ter 14 dígitos.');
+            return;
+        }
+    }
+    if (from === 3) {
+        var na = document.getElementById('nomeAdmin');
+        var ea = document.getElementById('emailAdmin');
+        var sa = document.getElementById('senhaAdmin');
+        var sc = document.getElementById('senhaConfirm');
+        if (!na.value.trim() || !ea.value.trim() || !sa.value || !sc.value) {
+            showGlobalError('Preencha todos os campos obrigatórios.');
+            return;
+        }
+        if (sa.value.length < 6) {
+            showGlobalError('A senha deve ter no mínimo 6 caracteres.');
+            return;
+        }
+        if (sa.value !== sc.value) {
+            document.getElementById('pwMatchError').classList.add('show');
+            return;
+        }
+        document.getElementById('pwMatchError').classList.remove('show');
+    }
+
+    if (from === 3) {
+        // Populate review
+        document.getElementById('revPlano').textContent = selectedPlan;
+        document.getElementById('revRazao').textContent = document.getElementById('razaoSocial').value;
+        document.getElementById('revFantasia').textContent = document.getElementById('nomeFantasia').value;
+        document.getElementById('revCnpj').textContent = document.getElementById('cnpj').value;
+        document.getElementById('revEmailEmp').textContent = document.getElementById('emailEmpresa').value;
+        document.getElementById('revNomeAdmin').textContent = document.getElementById('nomeAdmin').value;
+        document.getElementById('revEmailAdmin').textContent = document.getElementById('emailAdmin').value;
+    }
+
+    currentStep = from + 1;
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function prevStep(from) {
+    hideGlobalError();
+    currentStep = from - 1;
+    updateProgress();
+}
+
+/* Submit */
+function submitOnboarding() {
+    hideGlobalError();
+    var btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Criando conta...';
+
+    var payload = {
+        razaoSocial: document.getElementById('razaoSocial').value.trim(),
+        nomeFantasia: document.getElementById('nomeFantasia').value.trim(),
+        cnpj: document.getElementById('cnpj').value.replace(/\D/g, ''),
+        email: document.getElementById('emailEmpresa').value.trim(),
+        telefone: document.getElementById('telefone').value.replace(/\D/g, ''),
+        nomeAdmin: document.getElementById('nomeAdmin').value.trim(),
+        emailAdmin: document.getElementById('emailAdmin').value.trim(),
+        senhaAdmin: document.getElementById('senhaAdmin').value,
+        planoEscolhido: selectedPlan
+    };
+
+    fetch('/api/public/onboarding', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(function(res) {
+        return res.json().then(function(data) { return { ok: res.ok, status: res.status, data: data }; });
+    })
+    .then(function(result) {
+        if (!result.ok) {
+            var msg = result.data.message || result.data.error || 'Erro ao criar conta. Tente novamente.';
+            throw new Error(msg);
+        }
+        // Show success
+        document.querySelectorAll('.step-panel').forEach(function(p) { p.classList.remove('active'); });
+        document.getElementById('successPanel').classList.add('show');
+        // Mark all steps done
+        document.querySelectorAll('.onb-step').forEach(function(el) {
+            el.classList.remove('active');
+            el.classList.add('done');
+        });
+        document.getElementById('progressFill').style.width = '100%';
+    })
+    .catch(function(err) {
+        showGlobalError(err.message);
+        btn.disabled = false;
+        btn.textContent = 'Criar minha conta →';
+    });
+}
+
+function showGlobalError(msg) {
+    var el = document.getElementById('globalError');
+    el.textContent = msg;
+    el.classList.add('show');
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function hideGlobalError() {
+    document.getElementById('globalError').classList.remove('show');
+}
+</script>
+</body>
+</html>

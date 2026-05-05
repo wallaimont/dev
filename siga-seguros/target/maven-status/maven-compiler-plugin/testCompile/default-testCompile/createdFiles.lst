@@ -1,0 +1,17 @@
+com\sigaseguros\service\PropostaServiceTest$Listar.class
+com\sigaseguros\service\PropostaServiceTest.class
+com\sigaseguros\service\AuthServiceTest$AlterarSenha.class
+com\sigaseguros\service\AuthServiceTest$RefreshToken.class
+com\sigaseguros\service\PropostaServiceTest$AlterarStatus.class
+com\sigaseguros\service\ClienteServiceTest$Atualizar.class
+com\sigaseguros\service\PropostaServiceTest$Criar.class
+com\sigaseguros\service\PropostaServiceTest$Inativar.class
+com\sigaseguros\service\PropostaServiceTest$UltimasPropostas.class
+com\sigaseguros\service\ClienteServiceTest$BuscarPorId.class
+com\sigaseguros\service\ClienteServiceTest$Criar.class
+com\sigaseguros\service\AuthServiceTest.class
+com\sigaseguros\service\PropostaServiceTest$BuscarPorId.class
+com\sigaseguros\service\ClienteServiceTest$Inativar.class
+com\sigaseguros\service\AuthServiceTest$Login.class
+com\sigaseguros\service\ClienteServiceTest.class
+com\sigaseguros\service\ClienteServiceTest$Listar.class

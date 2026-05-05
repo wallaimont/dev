@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/orderhub
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+
+server:
+  port: 8080
+
+app:
+  jwt:
+    secret: super-secret-key-super-secret-key-1234567890
+    expiration: 86400000
+  integration:
+    billing-url: https://httpbin.org/post

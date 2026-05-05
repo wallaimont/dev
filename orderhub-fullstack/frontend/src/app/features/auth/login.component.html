@@ -1,0 +1,23 @@
+<div class="auth-wrapper">
+  <div class="card" style="width: 420px;">
+    <h2 style="margin-bottom: 8px;">Login</h2>
+    <p style="margin-bottom: 20px; color: #6b7280;">Acesse o painel OrderHub</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
+      <div>
+        <label>E-mail</label>
+        <input type="email" formControlName="email">
+      </div>
+
+      <div>
+        <label>Senha</label>
+        <input type="password" formControlName="password">
+      </div>
+
+      <button class="btn btn-primary" type="submit">Entrar</button>
+    </form>
+
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <p style="margin-top: 16px; font-size: 14px; color: #6b7280;">Usuário demo: admin&#64;orderhub.com / senha: 123456</p>
+  </div>
+</div>

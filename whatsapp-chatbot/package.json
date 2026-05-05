@@ -1,0 +1,20 @@
+{
+  "name": "whatsapp-chatbot",
+  "version": "1.0.0",
+  "description": "Chatbot WhatsApp para empresa de tecnologia com IA",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "openai": "^4.77.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

@@ -1,0 +1,2 @@
+ALTER TABLE coupon_usages
+    ADD COLUMN IF NOT EXISTS discount_applied NUMERIC(12,2) NOT NULL DEFAULT 0;
